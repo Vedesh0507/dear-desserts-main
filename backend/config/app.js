@@ -109,6 +109,26 @@ app.use(async (req, res, next) => {
   }
 });
 
+// ---------- Emergency Admin Password Reset (Temporary) ----------
+// Visit: /api/auth/force-reset-admin to reset password to Vedesh0507
+app.get('/api/auth/force-reset-admin', async (req, res) => {
+  try {
+    const { User } = require('../models');
+    const admin = await User.findOne({ email: 'admin@deardesserts.com' });
+    if (admin) {
+      admin.password = 'Vedesh0507';
+      await admin.save();
+      return res.json({ 
+        success: true, 
+        message: '✅ Admin password has been forced to: Vedesh0507' 
+      });
+    }
+    res.status(404).json({ success: false, message: 'Admin user not found' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ---------- API Routes ----------
 
 app.use('/api/auth', authRoutes);
