@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
-let isConnected = false;
-let connectionAttempt = null;
+let lastError = null;
 
 const connectDB = async () => {
   // If already connected, reuse connection
@@ -20,6 +19,10 @@ const connectDB = async () => {
     return; // Don't throw — let the server start without DB
   }
 
+  // Mask URI for logging
+  const maskedUri = process.env.MONGODB_URI.replace(/\/\/.*@/, '//****:****@');
+  console.log(`🔌 Attempting to connect to MongoDB: ${maskedUri}`);
+
   try {
     // Start connection attempt
     connectionAttempt = mongoose.connect(process.env.MONGODB_URI, {
@@ -30,14 +33,18 @@ const connectDB = async () => {
     await connectionAttempt;
     isConnected = true;
     connectionAttempt = null;
+    lastError = null;
     console.log(`✅ MongoDB Connected: ${mongoose.connection.host}`);
   } catch (error) {
     connectionAttempt = null;
     isConnected = false;
+    lastError = error.message;
     console.error(`❌ MongoDB connection failed: ${error.message}`);
     console.error('   The server will continue running. API routes requiring the database will return 503.');
   }
 };
+
+const getDBError = () => lastError;
 
 // Listen for disconnection events to update state
 mongoose.connection.on('disconnected', () => {
@@ -50,4 +57,4 @@ mongoose.connection.on('reconnected', () => {
   console.log('✅ MongoDB reconnected.');
 });
 
-module.exports = connectDB;
+module.exports = { connectDB, getDBError };
