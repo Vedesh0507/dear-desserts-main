@@ -15,7 +15,7 @@ const seedDatabase = async () => {
     const adminUser = await User.create({
       name: 'Admin',
       email: 'admin@deardesserts.com',
-      password: 'admin123',
+      password: 'Vedesh0507',
       role: 'admin',
       phone: '+91 98765 43210'
     });

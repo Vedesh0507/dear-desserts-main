@@ -110,7 +110,7 @@ const Login = () => {
           <div className="mt-6 p-4 bg-chocolate-50 rounded-xl">
             <p className="text-sm text-chocolate-600 text-center font-medium mb-2">Demo Credentials</p>
             <div className="text-sm text-chocolate-500 space-y-1">
-              <p><strong>Admin:</strong> admin@deardesserts.com / admin123</p>
+              <p><strong>Admin:</strong> admin@deardesserts.com / Vedesh0507</p>
               <p><strong>Staff:</strong> staff@deardesserts.com / staff123</p>
             </div>
           </div>
