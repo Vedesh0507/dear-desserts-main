@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+let isConnected = false;
+let connectionAttempt = null;
 let lastError = null;
 
 const connectDB = async () => {
