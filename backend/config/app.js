@@ -114,16 +114,30 @@ app.use(async (req, res, next) => {
 app.get('/api/auth/force-reset-admin', async (req, res) => {
   try {
     const { User } = require('../models');
-    const admin = await User.findOne({ email: 'admin@deardesserts.com' });
+    let admin = await User.findOne({ email: 'admin@deardesserts.com' });
+    
     if (admin) {
+      // If admin exists, just update password
       admin.password = 'Vedesh0507';
       await admin.save();
       return res.json({ 
         success: true, 
-        message: '✅ Admin password has been forced to: Vedesh0507' 
+        message: '✅ Admin password has been updated to: Vedesh0507' 
+      });
+    } else {
+      // If admin is missing, CREATE IT
+      admin = await User.create({
+        name: 'Admin',
+        email: 'admin@deardesserts.com',
+        password: 'Vedesh0507',
+        role: 'admin',
+        phone: '+91 00000 00000'
+      });
+      return res.json({ 
+        success: true, 
+        message: '🚀 Admin account was MISSING, so I CREATED it! Password: Vedesh0507' 
       });
     }
-    res.status(404).json({ success: false, message: 'Admin user not found' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
