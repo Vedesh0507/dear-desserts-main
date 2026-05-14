@@ -16,11 +16,12 @@ const QRCode = require('qrcode');
  * @returns {string} UPI intent URL
  */
 function buildUPIIntentURL({ amount, orderId, tokenNumber, upiId, payeeName }) {
-  const pa = upiId || process.env.UPI_ID;
-  const pn = payeeName || process.env.UPI_PAYEE_NAME || 'Dear Desserts';
+  // Use fallbacks to ensure production works even if env vars are missing
+  const pa = upiId || process.env.UPI_ID || '9391781748@ybl';
+  const pn = payeeName || process.env.UPI_PAYEE_NAME || 'MANEPALLI PURNACHANDRA RAO';
 
   if (!pa || pa.trim() === '') {
-    throw new Error('UPI_ID is not configured in .env. Current value: ' + pa);
+    throw new Error('UPI_ID is not configured. Falling back to default.');
   }
 
   if (typeof amount !== 'number' || isNaN(amount)) {

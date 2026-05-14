@@ -61,7 +61,8 @@ exports.createOrder = async (req, res) => {
       discountCode: discountCode ? discountCode.toUpperCase() : undefined,
       total,
       paymentMethod,
-      paymentStatus: paymentStatus || 'pending',
+      // For UPI, always start as pending unless explicitly provided
+      paymentStatus: paymentMethod === 'upi' ? 'pending' : (paymentStatus || 'pending'),
       notes,
       statusHistory: [{ status: 'new', timestamp: new Date() }]
     });
@@ -85,16 +86,16 @@ exports.createOrder = async (req, res) => {
     if (paymentMethod && ['upi', 'online'].includes(paymentMethod)) {
       try {
         // Ensure order is fully saved and has fields before QR generation
-        // Mongoose document might need a fresh fetch or we can use local values
         paymentQR = await generatePaymentQR({
           amount: total,
           orderId: order.orderNumber,
           tokenNumber: order.tokenNumber,
         });
-        console.log(`✅ QR generated for order ${order.orderNumber}`);
+        console.log(`✅ Production QR Generated: ${order.orderNumber} for ₹${total}`);
       } catch (qrError) {
-        console.error('❌ QR generation failed:', qrError.message);
-        // Optionally: we could try a fallback here or just leave it null
+        console.error('❌ Production QR Error:', qrError.message);
+        // Fallback: If generation fails, we still want to return a basic object if possible
+        // but since we hardcoded fallbacks in upiQR.js, this shouldn't happen.
       }
     }
 
@@ -104,6 +105,7 @@ exports.createOrder = async (req, res) => {
       paymentQR
     });
   } catch (error) {
+    console.error('Order Creation Error:', error);
     res.status(500).json({
       success: false,
       message: error.message

@@ -366,74 +366,116 @@ const Checkout = () => {
         </form>
       </div>
 
-      {/* Payment QR Modal */}
-      {showQR && qrData && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-chocolate-100"
-          >
-            {/* Header */}
-            <div className="bg-chocolate-800 p-6 text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="w-14 h-14 bg-gold-500/20 rounded-full flex items-center justify-center mb-3 border border-gold-500/30">
-                  <Smartphone className="w-7 h-7 text-gold-400" />
-                </div>
-                <h3 className="text-xl font-display font-bold text-cream-50 tracking-wider">SCAN & PAY</h3>
-              </div>
-            </div>
-
-            <div className="p-8 text-center bg-cream-50">
-              {/* Order Info */}
-              <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm border border-chocolate-50">
-                <div className="text-left">
-                  <p className="text-chocolate-400 text-xs font-semibold uppercase tracking-wider mb-1">Token Number</p>
-                  <p className="text-3xl font-display font-bold text-chocolate-800 leading-none">#{currentOrder?.tokenNumber}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-chocolate-400 text-xs font-semibold uppercase tracking-wider mb-1">Amount</p>
-                  <p className="text-3xl font-display font-bold text-gold-600 leading-none">₹{qrData.amount}</p>
-                </div>
-              </div>
-              
-              {/* QR Code container */}
-              <div className="bg-white p-3 rounded-2xl mb-6 inline-block shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 relative group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-gold-500/20 to-chocolate-500/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl blur-xl"></div>
-                <img src={qrData.qrDataURL} alt="Payment QR" className="w-56 h-56 mx-auto relative z-10" />
-              </div>
-              
-              {/* UPI ID Display */}
-              <div className="mb-8">
-                <p className="text-[11px] text-chocolate-400 font-bold uppercase tracking-widest mb-1.5">UPI ID</p>
-                <div className="inline-flex items-center gap-2 bg-chocolate-50 px-4 py-2 rounded-xl border border-chocolate-100">
-                  <span className="font-mono text-[15px] font-bold text-chocolate-800 tracking-wide">
-                    {qrData.payeeUPI || '9391781748@ybl'}
-                  </span>
+      {/* Payment QR Modal / Premium Overlay */}
+      <AnimatePresence>
+        {showQR && qrData && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-chocolate-950/80 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden border border-white/20 relative z-10"
+            >
+              {/* Header section with gradient */}
+              <div className="bg-gradient-to-br from-chocolate-800 to-chocolate-900 p-8 text-center relative">
+                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold-500/20 rounded-full border border-gold-500/30 mb-4">
+                    <Sparkles className="w-4 h-4 text-gold-400" />
+                    <span className="text-gold-400 text-xs font-bold uppercase tracking-widest">Premium Payment</span>
+                  </div>
+                  <h3 className="text-3xl font-display font-bold text-cream-50">Scan & Pay</h3>
+                  <p className="text-cream-300/80 text-sm mt-1">Complete your order securely via UPI</p>
                 </div>
               </div>
 
-              <p className="text-sm text-chocolate-500 font-medium px-2 mb-8 leading-relaxed">
-                Please complete payment and show confirmation to the counter if needed.
-              </p>
+              <div className="p-8 lg:p-10 bg-cream-50">
+                {/* Order Summary Card */}
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-chocolate-100/50 mb-8 flex justify-between items-center">
+                  <div>
+                    <p className="text-chocolate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Your Token</p>
+                    <div className="flex items-center gap-2">
+                      <Hash className="w-5 h-5 text-gold-600" />
+                      <span className="text-4xl font-display font-black text-chocolate-900">
+                        {currentOrder?.tokenNumber}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-chocolate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Payable Amount</p>
+                    <p className="text-4xl font-display font-black text-gold-600">
+                      ₹{qrData.amount}
+                    </p>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  clearCart();
-                  toast.success('Payment marked for verification!');
-                  navigate(`/order-success/${currentOrder?.orderNumber}`);
-                }}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-gold-500/30 hover:shadow-gold-500/50 hover:-translate-y-0.5"
-              >
-                <CheckCircle className="w-5 h-5" />
-                <span>I have Paid Successfully</span>
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+                {/* QR Code Section */}
+                <div className="relative group flex justify-center mb-8">
+                  <div className="absolute inset-0 bg-gold-500/20 blur-3xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-500"></div>
+                  <div className="relative bg-white p-4 rounded-[2rem] shadow-xl border border-white group-hover:scale-[1.02] transition-transform duration-300">
+                    <img 
+                      src={qrData.qrDataURL} 
+                      alt="UPI QR Code" 
+                      className="w-64 h-64 md:w-72 md:h-72 object-contain"
+                    />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-gray-100">
+                       <Smartphone className="w-6 h-6 text-chocolate-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Merchant Details */}
+                <div className="space-y-4 mb-10 text-center">
+                  <div className="inline-block">
+                    <p className="text-[10px] text-chocolate-400 font-bold uppercase tracking-[0.2em] mb-2">Merchant UPI ID</p>
+                    <div className="px-6 py-2.5 bg-chocolate-100/50 rounded-2xl border border-chocolate-200/50">
+                      <span className="font-mono text-lg font-black text-chocolate-800 tracking-tight">
+                        {qrData.payeeUPI || '9391781748@ybl'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-chocolate-400 flex items-center justify-center gap-2 font-medium">
+                    <Shield className="w-4 h-4" />
+                    Secure Transaction • Verified Merchant
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearCart();
+                      toast.success('Order placed successfully!');
+                      navigate(`/order-success/${currentOrder?.orderNumber}`);
+                    }}
+                    className="group relative w-full flex items-center justify-center gap-3 py-5 bg-chocolate-900 hover:bg-black text-white rounded-[1.5rem] font-bold text-lg transition-all shadow-xl shadow-chocolate-900/20 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-gold-500/0 via-gold-500/20 to-gold-500/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    <CheckCircle className="w-6 h-6 text-gold-400" />
+                    <span className="relative z-10 tracking-wide">Confirm Payment Success</span>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setShowQR(false)}
+                    className="w-full py-4 text-chocolate-400 hover:text-chocolate-600 font-bold text-sm transition-colors uppercase tracking-widest"
+                  >
+                    Cancel & Modify Order
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
