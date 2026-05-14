@@ -84,13 +84,17 @@ exports.createOrder = async (req, res) => {
     let paymentQR = null;
     if (paymentMethod && ['upi', 'online'].includes(paymentMethod)) {
       try {
+        // Ensure order is fully saved and has fields before QR generation
+        // Mongoose document might need a fresh fetch or we can use local values
         paymentQR = await generatePaymentQR({
           amount: total,
           orderId: order.orderNumber,
           tokenNumber: order.tokenNumber,
         });
+        console.log(`✅ QR generated for order ${order.orderNumber}`);
       } catch (qrError) {
-        console.warn('QR generation skipped:', qrError.message);
+        console.error('❌ QR generation failed:', qrError.message);
+        // Optionally: we could try a fallback here or just leave it null
       }
     }
 

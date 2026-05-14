@@ -195,13 +195,9 @@ exports.getUsers = async (req, res) => {
 // @access  Private/Admin
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, role, isActive, phone } = req.body;
+    const { name, email, role, isActive, phone, password } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email, role, isActive, phone },
-      { new: true, runValidators: true }
-    );
+    const user = await User.findById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -210,9 +206,31 @@ exports.updateUser = async (req, res) => {
       });
     }
 
+    // Update fields if provided
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
+    if (phone !== undefined) user.phone = phone;
+
+    // Only update password if provided and not empty
+    if (password && password.trim() !== '') {
+      user.password = password;
+    }
+
+    // Using .save() instead of findByIdAndUpdate to trigger pre-save hooks (password hashing)
+    await user.save();
+
     res.json({
       success: true,
-      data: user
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+        phone: user.phone
+      }
     });
   } catch (error) {
     res.status(500).json({

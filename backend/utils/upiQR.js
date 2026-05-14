@@ -19,11 +19,19 @@ function buildUPIIntentURL({ amount, orderId, tokenNumber, upiId, payeeName }) {
   const pa = upiId || process.env.UPI_ID;
   const pn = payeeName || process.env.UPI_PAYEE_NAME || 'Dear Desserts';
 
-  if (!pa) {
-    throw new Error('UPI_ID is not configured. Set it in .env');
+  if (!pa || pa.trim() === '') {
+    throw new Error('UPI_ID is not configured in .env. Current value: ' + pa);
   }
 
-  const transactionNote = `Token ${tokenNumber} - Order ${orderId}`;
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    throw new Error('Invalid amount provided for QR generation: ' + amount);
+  }
+
+  // Use fallback if orderId or tokenNumber are missing (though they shouldn't be)
+  const displayToken = tokenNumber || '00';
+  const displayOrder = orderId || 'NEW';
+
+  const transactionNote = `Token ${displayToken} - Order ${displayOrder}`;
 
   const params = new URLSearchParams({
     pa,
