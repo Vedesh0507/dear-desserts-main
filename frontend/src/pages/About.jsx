@@ -10,7 +10,7 @@ const About = () => {
   };
 
   return (
-    <div className="pt-20 min-h-screen bg-cream-50 overflow-hidden selection:bg-gold-500/30">
+    <div className="pt-0 min-h-screen bg-cream-50 overflow-hidden selection:bg-gold-500/30">
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">

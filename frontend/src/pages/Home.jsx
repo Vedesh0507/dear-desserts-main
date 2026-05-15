@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform, animate, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, animate, useInView, useMotionValue } from 'framer-motion';
 import { ArrowRight, Star, MapPin, Phone, Clock, Sparkles, Award, Heart } from 'lucide-react';
 import { menuAPI, settingsAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -11,28 +11,26 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const AnimatedCounter = ({ value, suffix = '' }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
-  const [hasAnimated, setHasAnimated] = useState(false);
-  
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+
   useEffect(() => {
-    if (inView && !hasAnimated) {
-      const node = ref.current;
-      const target = parseFloat(value.replace(/[^0-9.]/g, ''));
-      
-      const controls = animate(0, target, {
+    if (inView) {
+      const target = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+      const controls = animate(count, target, {
         duration: 2.5,
         ease: [0.22, 1, 0.36, 1],
-        onUpdate(v) {
-          if (node) {
-            node.textContent = Math.round(v) + suffix;
-          }
-        }
       });
-      setHasAnimated(true);
       return () => controls.stop();
     }
-  }, [inView, value, suffix, hasAnimated]);
-  
-  return <span ref={ref}>0{suffix}</span>;
+  }, [inView, value, count]);
+
+  return (
+    <span ref={ref} className="inline-flex items-baseline">
+      <motion.span>{rounded}</motion.span>
+      <span>{suffix}</span>
+    </span>
+  );
 };
 
 const Home = () => {
@@ -103,12 +101,12 @@ const Home = () => {
   ];
 
   const categories = [
-    { name: 'Cakes', icon: '🎂', desc: 'Custom & Classic', id: 'cakes', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80' },
-    { name: 'Specials', icon: '🌟', desc: 'Chef\'s Choice', id: 'specials', image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80' },
-    { name: 'Brownies', icon: '🍫', desc: 'Rich & Fudgy', id: 'brownies', image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80' },
-    { name: 'Savories', icon: '🥪', desc: 'Perfect Bites', id: 'savories', image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80' },
-    { name: 'Bubble Waffles', icon: '🧇', desc: 'Hong Kong Style', id: 'bubble_waffles', image: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80' },
-    { name: 'Popsicles', icon: '🍦', desc: 'Artisanal Ice', id: 'popsicles', image: 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400&q=80' },
+    { name: 'Specials', icon: '🌟', desc: 'Chef\'s Choice', id: 'specials', image: '/Specials.jpeg' },
+    { name: 'Brownies', icon: '🍫', desc: 'Rich & Fudgy', id: 'brownies', image: '/Brownies.jpeg' },
+    { name: 'Bubble Waffles', icon: '🧇', desc: 'Hong Kong Style', id: 'bubble_waffles', image: '/Bubble_waffles.jpeg' },
+    { name: 'Popsicles', icon: '🍦', desc: 'Artisanal Ice', id: 'popsicles', image: '/Popsicles.jpeg' },
+    { name: 'Cakes', icon: '🎂', desc: 'Custom & Classic', id: 'cakes', image: '/Cakes.jpeg' },
+    { name: 'Savories', icon: '🥪', desc: 'Perfect Bites', id: 'savories', image: '/Savories.jpeg' },
   ];
 
   const stats = [
@@ -296,29 +294,6 @@ const Home = () => {
         </div>
       </motion.section>
 
-      {/* Animated Stats Bar */}
-      <section className="py-16 bg-chocolate-950 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=1200&q=30')] bg-cover bg-center opacity-10"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: index * 0.15, duration: 0.6 }}
-                className="text-center px-4"
-              >
-                <div className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-gold-400 mb-3 drop-shadow-lg">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="text-cream-300 text-sm md:text-base font-medium tracking-widest uppercase">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Categories - Premium Bento Grid */}
       <section className="py-32 bg-white relative">
@@ -337,47 +312,69 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
             {categories.map((cat, index) => (
               <motion.div
                 key={cat.name}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
+                transition={{ delay: index * 0.05, duration: 0.5 }}
               >
                 <Link
                   to={`/menu?category=${cat.id}`}
-                  className="group block relative h-[350px] rounded-[2rem] overflow-hidden bg-cream-50 shadow-lg hover:shadow-2xl transition-all duration-500"
+                  className="group block"
                 >
-                  <motion.img
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    src={cat.image}
-                    alt={cat.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-chocolate-950/90 via-chocolate-950/20 to-transparent transition-opacity duration-300"></div>
-                  
-                  <div className="absolute inset-0 p-8 flex flex-col justify-end text-left">
-                    <motion.div 
-                      className="bg-white/20 backdrop-blur-md w-16 h-16 rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-inner"
-                      whileHover={{ rotate: 10, scale: 1.1 }}
-                    >
-                      {cat.icon}
-                    </motion.div>
-                    <h3 className="font-display text-3xl font-bold text-white mb-2">
+                  <div className="relative aspect-square overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-chocolate-100 shadow-lg group-hover:shadow-2xl transition-all duration-500 mb-6">
+                    <motion.img
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                      src={cat.image}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    {/* Subtle border for definition */}
+                    <div className="absolute inset-0 border border-black/5 rounded-[1.5rem] md:rounded-[2.5rem] pointer-events-none"></div>
+                  </div>
+
+                  {/* Text Content - Moved Below Image */}
+                  <div className="text-center px-2">
+                    <h3 className="font-display text-2xl md:text-3xl font-bold text-chocolate-900 mb-2 tracking-tight group-hover:text-gold-600 transition-colors duration-300">
                       {cat.name}
                     </h3>
-                    <p className="text-cream-200 text-lg font-light mb-4">{cat.desc}</p>
-                    
-                    {/* Hover Reveal Button */}
-                    <div className="h-0 overflow-hidden group-hover:h-8 transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center gap-2 text-gold-400 font-semibold tracking-wide uppercase text-sm">
-                      <span>Explore Collection</span>
-                      <ArrowRight className="w-4 h-4" />
+                    <p className="text-chocolate-500/80 text-sm md:text-base font-medium tracking-widest uppercase mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+                      {cat.desc}
+                    </p>
+                    <div className="flex justify-center items-center gap-2 text-gold-600 font-bold tracking-[0.2em] uppercase text-xs md:text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
+                      <span>Explore</span>
+                      <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Animated Stats Bar */}
+      <section className="py-16 bg-chocolate-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=1200&q=30')] bg-cover bg-center opacity-10"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/10">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: index * 0.15, duration: 0.6 }}
+                className="text-center px-4"
+              >
+                <div className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-gold-400 mb-3 drop-shadow-lg">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-cream-300 text-sm md:text-base font-medium tracking-widest uppercase">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -472,56 +469,60 @@ const Home = () => {
       )}
 
       {/* CTA Section - Cinematic Banner */}
-      <section className="py-24 bg-white relative overflow-hidden">
+      <section className="py-20 md:py-32 bg-white relative overflow-hidden">
         <div className="container mx-auto px-4 max-w-6xl">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1 }}
-            className="relative rounded-[3rem] overflow-hidden shadow-2xl"
+            className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl"
           >
             {/* Background Parallax Image */}
             <motion.div 
               className="absolute inset-0"
               style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=1600&q=80')",
+                backgroundImage: "url('https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=1600&q=80')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                y: useTransform(scrollY, [2000, 4000], [0, 150]) // Simple parallax
+                y: useTransform(scrollY, [2000, 4000], [0, 100]) // Simple parallax
               }}
             />
-            <div className="absolute inset-0 bg-chocolate-950/80 backdrop-blur-sm"></div>
+            {/* Premium Dark Glass Overlay */}
+            <div className="absolute inset-0 bg-chocolate-950/80 backdrop-blur-[4px] bg-gradient-to-t from-chocolate-950/90 to-transparent"></div>
             
             {/* Content */}
-            <div className="relative z-10 p-16 md:p-24 text-center flex flex-col items-center">
+            <div className="relative z-10 p-10 md:p-24 text-center flex flex-col items-center">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3, duration: 0.8 }}
               >
-                <div className="w-20 h-20 mx-auto bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mb-8 rotate-3 shadow-xl">
-                  <Sparkles className="w-10 h-10 text-white" />
+                <div className="w-16 h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center mb-6 md:mb-8 rotate-3 shadow-xl border border-gold-300/30">
+                  <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </div>
-                <h2 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-white mb-8">
-                  Experience The <br />
-                  <span className="gradient-text-gold italic">Extraordinary</span>
+                
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6 leading-tight drop-shadow-lg">
+                  Indulge in Every <br className="hidden md:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500 italic">Sweet Moment</span>
                 </h2>
-                <p className="text-cream-200 text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-                  Join thousands of dessert lovers who have made Dear Desserts their ultimate destination for sweetness.
+                
+                <p className="text-cream-200/90 text-base md:text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed tracking-wide drop-shadow-md">
+                  From handcrafted brownies to signature waffles and premium desserts, every creation is made to deliver happiness in every bite. Experience the taste Vijayawada loves.
                 </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                
+                <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6">
                   <Link
                     to="/menu"
-                    className="btn-gold px-10 py-5 text-lg flex items-center justify-center gap-3 w-full sm:w-auto"
+                    className="group bg-gold-500 hover:bg-gold-400 text-chocolate-950 px-10 py-4 rounded-full font-bold tracking-wider shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] transition-all duration-300 flex items-center justify-center gap-3 w-full sm:w-auto"
                   >
-                    <span>Start Order</span>
-                    <ArrowRight className="w-5 h-5" />
+                    <span>Order Now</span>
+                    <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link
                     to="/menu"
-                    className="px-10 py-5 text-lg font-medium text-white border-2 border-white/20 rounded-full hover:bg-white hover:text-chocolate-950 transition-all duration-300 w-full sm:w-auto"
+                    className="px-10 py-4 text-white border border-white/30 bg-white/5 backdrop-blur-md rounded-full font-medium tracking-wider hover:bg-white/15 hover:border-white/50 transition-all duration-300 w-full sm:w-auto"
                   >
                     View Menu
                   </Link>

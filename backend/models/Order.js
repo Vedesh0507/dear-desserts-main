@@ -101,22 +101,28 @@ orderSchema.pre('save', async function(next) {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    const count = await this.constructor.countDocuments({
+    // Find the latest order of the day to determine the next token number
+    const latestOrder = await this.constructor.findOne({
       createdAt: {
         $gte: startOfDay,
-        $lt: endOfDay
+        $lte: endOfDay
       }
-    });
+    }).sort({ tokenNumber: -1 });
 
-    // Generate order number (e.g. DD202605130001)
+    const nextToken = latestOrder ? latestOrder.tokenNumber + 1 : 1;
+
+    // Generate order number (e.g. DD202605160001) using local date
     if (!this.orderNumber) {
-      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-      this.orderNumber = `DD${dateStr}${String(count + 1).padStart(4, '0')}`;
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}${mm}${dd}`;
+      this.orderNumber = `DD${dateStr}${String(nextToken).padStart(4, '0')}`;
     }
 
     // Generate daily token number (resets to 1 every day)
     if (!this.tokenNumber) {
-      this.tokenNumber = count + 1;
+      this.tokenNumber = nextToken;
     }
   }
   next();

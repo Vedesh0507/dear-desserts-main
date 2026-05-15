@@ -76,30 +76,10 @@ const Menu = () => {
   }, {});
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-28 pb-16">
+    <div className="min-h-screen bg-cream-50 pt-0 pb-16">
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-chocolate-900 to-chocolate-800 text-cream-50 py-16 mb-12 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=1200&q=30')] bg-cover bg-center"></div>
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium tracking-wider uppercase mb-6 bg-gold-500/20 text-gold-400">
-              <Sparkles className="w-4 h-4" />
-              Our Collection
-            </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6">
-              The Menu
-            </h1>
-            <p className="text-cream-300 max-w-xl mx-auto text-lg">
-              Handcrafted desserts made with premium ingredients and artisanal passion
-            </p>
-          </motion.div>
-        </div>
+      <div className="w-full mb-8 md:mb-12">
+        <img src="/menu.png" alt="Our Collection - The Menu" className="w-full h-auto object-contain" />
       </div>
 
       <div className="container mx-auto px-4">
@@ -108,44 +88,77 @@ const Menu = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-12"
+          className="mb-12 relative z-10"
         >
           {/* Search Bar */}
-          <div className="relative max-w-lg mx-auto mb-8">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-chocolate-400" />
-            <input
-              type="text"
-              placeholder="Search our desserts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-12 py-4 rounded-2xl border border-chocolate-200/60 bg-white text-chocolate-800 placeholder-chocolate-400 focus:border-gold-500 focus:ring-4 focus:ring-gold-400/20 focus:outline-none transition-all shadow-soft"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-chocolate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-chocolate-400" />
-              </button>
-            )}
+          <div className="relative max-w-2xl mx-auto mb-10 px-2">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gold-400/10 rounded-2xl blur-xl group-focus-within:bg-gold-400/20 transition-all duration-500"></div>
+              <div className="relative flex items-center bg-white/90 backdrop-blur-md rounded-2xl border border-chocolate-100 shadow-soft-lg overflow-hidden transition-all duration-300 focus-within:border-gold-400/50 focus-within:shadow-luxury">
+                <div className="pl-6">
+                  <Search className="w-5 h-5 text-chocolate-400 group-focus-within:text-gold-600 transition-colors" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search your favorite desserts..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-12 py-5 bg-transparent text-chocolate-800 placeholder-chocolate-400/70 focus:outline-none font-medium"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 p-2 hover:bg-chocolate-50 rounded-full transition-colors text-chocolate-400 hover:text-chocolate-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                  activeCategory === cat.id
-                    ? 'bg-chocolate-800 text-cream-50 shadow-elevated'
-                    : 'bg-white text-chocolate-600 hover:bg-chocolate-100 shadow-soft border border-chocolate-100'
-                }`}
-              >
-                <span className="text-lg">{cat.icon}</span>
-                <span>{cat.name}</span>
-              </button>
-            ))}
+          {/* Category Filter - Premium Horizontal Scroll */}
+          <div className="relative">
+            {/* Gradient Fades for Scroll Indication */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-cream-50 to-transparent z-10 pointer-events-none md:hidden"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-cream-50 to-transparent z-10 pointer-events-none md:hidden"></div>
+            
+            <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-3 px-4 pb-4 -mx-4 md:mx-0 md:justify-center md:flex-wrap">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryChange(cat.id)}
+                  className={`relative flex-shrink-0 flex items-center gap-2.5 px-6 py-3.5 rounded-full font-medium transition-all duration-500 snap-center ${
+                    activeCategory === cat.id
+                      ? 'text-cream-50 shadow-luxury'
+                      : 'bg-white/80 backdrop-blur-sm text-chocolate-600 hover:bg-white hover:text-chocolate-800 shadow-soft border border-chocolate-50/50'
+                  }`}
+                >
+                  {/* Active Background Animation */}
+                  {activeCategory === cat.id && (
+                    <motion.div
+                      layoutId="activeCategory"
+                      className="absolute inset-0 bg-gradient-to-r from-chocolate-800 to-chocolate-900 rounded-full -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  
+                  <span className={`text-xl transition-transform duration-300 ${activeCategory === cat.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                    {cat.icon}
+                  </span>
+                  <span className="whitespace-nowrap tracking-wide">{cat.name}</span>
+                  
+                  {/* Subtle selection indicator */}
+                  {activeCategory === cat.id && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-1.5 h-1.5 rounded-full bg-gold-400 shadow-gold ml-1"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </motion.div>
 
@@ -193,18 +206,17 @@ const Menu = () => {
                 </div>
                 <div className={`flex-1 h-px ml-4 ${category === 'specials' ? 'bg-gradient-to-r from-gold-300 to-transparent' : 'bg-gradient-to-r from-chocolate-200 to-transparent'}`}></div>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
                 {items.map((item, index) => (
-                  <MenuCard key={item._id} item={item} index={index} addToCart={addToCart} />
+                  <MenuCard key={item._id} item={item} index={index} />
                 ))}
               </div>
             </div>
           ))
         ) : (
-          // Flat list
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="max-w-4xl mx-auto flex flex-col gap-2">
             {filteredItems.map((item, index) => (
-              <MenuCard key={item._id} item={item} index={index} addToCart={addToCart} />
+              <MenuCard key={item._id} item={item} index={index} />
             ))}
           </div>
         )}
@@ -213,31 +225,70 @@ const Menu = () => {
   );
 };
 
-const MenuCard = ({ item, index, addToCart }) => {
+const MenuCard = ({ item, index }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const { cartItems, addToCart, updateQuantity } = useCart();
+  
+  const cartItem = cartItems.find(i => i._id === item._id);
+  const quantity = cartItem ? cartItem.quantity : 0;
+
+  const description = item.description || 'Artisan handcrafted dessert made with premium ingredients.';
+  const isLongDesc = description.length > 100;
+  const displayDesc = showFullDesc ? description : `${description.slice(0, 100)}${isLongDesc ? '...' : ''}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="group relative bg-white/50 backdrop-blur-sm rounded-[2rem] p-5 md:p-8 transition-all duration-300 hover:bg-white hover:shadow-soft-lg mb-4 border border-chocolate-50/50"
     >
-      <div className="card-luxury h-full flex flex-col">
-        <div className="relative overflow-hidden">
-          {/* Image placeholder */}
-          <div className={`absolute inset-0 bg-gradient-to-br from-chocolate-100 to-chocolate-200 ${imageLoaded ? 'hidden' : 'block'}`}>
-            <div className="animate-pulse h-full w-full"></div>
+      <div className="flex justify-between gap-6">
+        {/* Left Side: Details */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center gap-2 mb-1">
+            {item.isSpecial && <Sparkles className="w-4 h-4 text-gold-500" />}
+            <span className="badge-gold text-[10px] py-0.5 px-2">
+              {item.category.replace('_', ' ')}
+            </span>
           </div>
+          
+          <h3 className="font-display text-xl md:text-2xl font-bold text-chocolate-800 mb-1">
+            {item.name}
+          </h3>
+          
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-lg font-bold text-chocolate-900">₹{item.price}</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-xs font-bold border border-emerald-100">
+              <Star className="w-3 h-3 fill-emerald-600" />
+              <span>4.8</span>
+              <span className="text-[10px] text-emerald-600/70 font-medium">(120+)</span>
+            </div>
+          </div>
+          
+          <div className="relative">
+            <p className="text-chocolate-500 text-sm leading-relaxed mb-1">
+              {displayDesc}
+              {isLongDesc && (
+                <button 
+                  onClick={() => setShowFullDesc(!showFullDesc)}
+                  className="ml-1 text-chocolate-800 font-bold hover:text-gold-600 transition-colors"
+                >
+                  {showFullDesc ? 'less' : 'more'}
+                </button>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side: Image & Add Button */}
+        <div className="relative flex-shrink-0 w-32 h-32 md:w-40 md:h-40">
+          <div className={`absolute inset-0 bg-chocolate-50 rounded-2xl ${imageLoaded ? 'hidden' : 'block animate-pulse'}`}></div>
           <img
             src={item.image?.startsWith('http') ? item.image : `${API_URL}/uploads/${item.image}`}
             alt={item.name}
-            className={`w-full h-56 object-cover transition-all duration-700 ${
-              isHovered ? 'scale-110' : 'scale-100'
-            } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-full object-cover rounded-2xl shadow-soft transition-all duration-700 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
               e.target.src = `https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80`;
@@ -245,71 +296,40 @@ const MenuCard = ({ item, index, addToCart }) => {
             }}
           />
           
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-chocolate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
-          {/* Badges */}
-          <div className="absolute top-4 left-4 flex gap-2">
-            {item.isBestSeller && (
-              <span className="badge-gold">Best Seller</span>
-            )}
-            {item.isSpecial && (
-              <span className="badge bg-rose-500 text-white">Special</span>
+          {/* Add Button Overlay */}
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[80%]">
+            {quantity === 0 ? (
+              <button
+                onClick={() => addToCart(item)}
+                disabled={!item.isAvailable}
+                className="w-full bg-white text-emerald-600 font-bold py-2.5 rounded-xl shadow-elevated border border-chocolate-100 hover:bg-emerald-50 transition-all active:scale-95 disabled:opacity-50"
+              >
+                ADD
+              </button>
+            ) : (
+              <div className="flex items-center justify-between bg-white text-emerald-600 font-bold py-2 rounded-xl shadow-elevated border border-chocolate-100 px-3">
+                <button 
+                  onClick={() => updateQuantity(item._id, quantity - 1)}
+                  className="hover:bg-emerald-50 p-1 rounded-md transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <span className="text-sm">{quantity}</span>
+                <button 
+                  onClick={() => updateQuantity(item._id, quantity + 1)}
+                  className="hover:bg-emerald-50 p-1 rounded-md transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
-
-          {/* Quick add button */}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              addToCart(item);
-            }}
-            disabled={!item.isAvailable}
-            className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full shadow-elevated flex items-center justify-center opacity-0 transform translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-gold-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
           
-          {/* Out of stock overlay */}
           {!item.isAvailable && (
-            <div className="absolute inset-0 bg-chocolate-950/60 flex items-center justify-center">
-              <span className="bg-rose-500 text-white px-5 py-2 rounded-full font-semibold text-sm">
-                Out of Stock
-              </span>
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center">
+              <span className="text-[10px] font-bold text-chocolate-500 tracking-widest uppercase">Unavailable</span>
             </div>
           )}
-        </div>
-        
-        <div className="p-6 flex-1 flex flex-col">
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
-            ))}
-            <span className="text-xs text-chocolate-400 ml-1">(4.9)</span>
-          </div>
-
-          <h3 className="font-display text-xl font-semibold text-chocolate-800 mb-2">
-            {item.name}
-          </h3>
-          
-          <p className="text-chocolate-500 text-sm line-clamp-2 flex-1 mb-4">
-            {item.description || 'A delicious treat crafted with premium ingredients'}
-          </p>
-          
-          <div className="flex items-center justify-between pt-4 border-t border-chocolate-100">
-            <span className="text-2xl font-display font-bold text-chocolate-800">
-              ₹{item.price}
-            </span>
-            <button
-              onClick={() => addToCart(item)}
-              disabled={!item.isAvailable}
-              className="flex items-center gap-2 bg-chocolate-800 text-cream-50 px-5 py-2.5 rounded-full text-sm font-medium hover:bg-chocolate-900 transition-all duration-300 hover:shadow-card disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add</span>
-            </button>
-          </div>
         </div>
       </div>
     </motion.div>
