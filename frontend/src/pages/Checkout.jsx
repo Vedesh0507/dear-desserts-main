@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { User, Phone, MapPin, CreditCard, Banknote, Smartphone, ArrowLeft, Loader2, Mail, FileText, Shield, Sparkles, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Phone, MapPin, CreditCard, Banknote, Smartphone, ArrowLeft, Loader2, Mail, FileText, Shield, Sparkles, CheckCircle, Hash } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { orderAPI } from '../services/api';
 import toast from 'react-hot-toast';

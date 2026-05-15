@@ -20,20 +20,13 @@ const Menu = () => {
 
   const categories = [
     { id: 'all', name: 'All Items', icon: '✨' },
+    { id: 'cakes', name: 'Cakes', icon: '🎂' },
+    { id: 'specials', name: 'Specials', icon: '🌟' },
     { id: 'brownies', name: 'Brownies', icon: '🍫' },
     { id: 'savories', name: 'Savories', icon: '🥪' },
     { id: 'bubble_waffles', name: 'Bubble Waffles', icon: '🧇' },
     { id: 'popsicles', name: 'Popsicles', icon: '🍦' },
-    { id: 'special_daily', name: 'Special Menu Daily', icon: '🌟' },
-    { id: 'special_weekend', name: 'Weekend Special Menu', icon: '🎊' },
   ];
-
-  const getDailySpecialTitle = () => {
-    const today = new Date();
-    const day = today.toLocaleDateString('en-US', { weekday: 'long' });
-    const date = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-    return `Today's Special — ${day}, ${date}`;
-  };
 
   useEffect(() => {
     fetchMenu();
@@ -193,16 +186,12 @@ const Menu = () => {
                   {categories.find(c => c.id === category)?.icon || '🍽️'}
                 </span>
                 <div>
-                  <h2 className={`text-2xl md:text-3xl font-display font-bold ${category === 'special_weekend' ? 'text-transparent bg-clip-text bg-gradient-to-r from-gold-500 to-gold-700' : 'text-chocolate-800'}`}>
-                    {category === 'special_daily' 
-                      ? getDailySpecialTitle() 
-                      : category === 'special_weekend'
-                      ? 'Weekend Specials'
-                      : categories.find(c => c.id === category)?.name || category}
+                  <h2 className={`text-2xl md:text-3xl font-display font-bold ${category === 'specials' ? 'text-transparent bg-clip-text bg-gradient-to-r from-gold-500 to-gold-700' : 'text-chocolate-800'}`}>
+                    {categories.find(c => c.id === category)?.name || category}
                   </h2>
                   <p className="text-chocolate-500 text-sm">{items.length} items</p>
                 </div>
-                <div className={`flex-1 h-px ml-4 ${category === 'special_weekend' ? 'bg-gradient-to-r from-gold-300 to-transparent' : 'bg-gradient-to-r from-chocolate-200 to-transparent'}`}></div>
+                <div className={`flex-1 h-px ml-4 ${category === 'specials' ? 'bg-gradient-to-r from-gold-300 to-transparent' : 'bg-gradient-to-r from-chocolate-200 to-transparent'}`}></div>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {items.map((item, index) => (

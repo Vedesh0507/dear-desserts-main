@@ -18,7 +18,7 @@ const menuItemSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['brownies', 'savories', 'bubble_waffles', 'popsicles', 'special_daily', 'special_weekend'],
+    enum: ['cakes', 'specials', 'brownies', 'savories', 'bubble_waffles', 'popsicles'],
     lowercase: true
   },
   image: {

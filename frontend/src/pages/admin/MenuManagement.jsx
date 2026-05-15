@@ -39,12 +39,12 @@ const MenuManagement = () => {
 
   const categories = [
     { id: 'all', name: 'All' },
+    { id: 'cakes', name: 'Cakes' },
+    { id: 'specials', name: 'Specials' },
     { id: 'brownies', name: 'Brownies' },
     { id: 'savories', name: 'Savories' },
     { id: 'bubble_waffles', name: 'Bubble Waffles' },
     { id: 'popsicles', name: 'Popsicles' },
-    { id: 'special_daily', name: 'Special Menu Daily' },
-    { id: 'special_weekend', name: 'Weekend Special Menu' },
   ];
 
   useEffect(() => {
@@ -395,12 +395,12 @@ const MenuManagement = () => {
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
                       >
+                        <option value="cakes">Cakes</option>
+                        <option value="specials">Specials</option>
                         <option value="brownies">Brownies</option>
                         <option value="savories">Savories</option>
                         <option value="bubble_waffles">Bubble Waffles</option>
                         <option value="popsicles">Popsicles</option>
-                        <option value="special_daily">Special Menu Daily</option>
-                        <option value="special_weekend">Weekend Special Menu</option>
                       </select>
                     </div>
                   </div>
