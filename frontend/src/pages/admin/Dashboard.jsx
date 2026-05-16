@@ -67,8 +67,8 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-chocolate-600"></div>
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-chocolate-600"></div>
       </div>
     );
   }
@@ -84,138 +84,157 @@ const Dashboard = () => {
       {
         label: 'Revenue (₹)',
         data: revenueData.map((d) => d.revenue),
-        borderColor: '#8B4513',
-        backgroundColor: 'rgba(139, 69, 19, 0.1)',
+        borderColor: '#7C4A32',
+        backgroundColor: 'rgba(124, 74, 50, 0.08)',
         fill: true,
         tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#7C4A32',
       }
     ],
   };
 
   return (
-    <div className="space-y-6 pb-20 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-display font-bold text-gray-800">Daily Sales Overview</h1>
+    <div className="space-y-4 max-w-5xl mx-auto pb-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="admin-page-title font-display">Daily Sales Overview</h1>
       </div>
 
-      {/* Primary KPI Row */}
-      <div className="grid grid-cols-2 gap-3 md:gap-4">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 bg-green-100 rounded-lg"><DollarSign className="w-5 h-5 text-green-600"/></div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Today's Sales</span>
+      {/* Primary KPI Row — 2 columns on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        {/* Today's Sales */}
+        <div className="admin-stat-card">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="p-1.5 bg-green-50 rounded-lg">
+              <DollarSign className="w-4 h-4 text-green-600"/>
+            </div>
+            <span className="stat-label">Today's Sales</span>
           </div>
-          <p className="text-3xl font-display font-bold text-gray-800">₹{today.revenue || 0}</p>
+          <p className="stat-value text-gray-800">₹{today.revenue || 0}</p>
         </div>
         
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="p-2 bg-blue-100 rounded-lg"><ShoppingBag className="w-5 h-5 text-blue-600"/></div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Orders</span>
+        {/* Total Orders */}
+        <div className="admin-stat-card">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="p-1.5 bg-blue-50 rounded-lg">
+              <ShoppingBag className="w-4 h-4 text-blue-600"/>
+            </div>
+            <span className="stat-label">Orders</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-display font-bold text-gray-800">{today.totalOrders || 0}</p>
-            <span className="text-sm font-medium text-gray-400">tokens</span>
+          <div className="flex items-baseline gap-1.5">
+            <p className="stat-value text-gray-800">{today.totalOrders || 0}</p>
+            <span className="text-[11px] font-medium text-gray-400">tokens</span>
           </div>
+        </div>
+
+        {/* Cash Collected */}
+        <div className="admin-stat-card">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="p-1.5 bg-emerald-50 rounded-lg">
+              <Banknote className="w-4 h-4 text-emerald-600"/>
+            </div>
+            <span className="stat-label">Cash</span>
+          </div>
+          <p className="stat-value text-emerald-700">₹{today.cashPaymentsTotal || 0}</p>
+        </div>
+
+        {/* Online Verified */}
+        <div className="admin-stat-card">
+          <div className="flex items-center gap-2 mb-1.5">
+            <div className="p-1.5 bg-purple-50 rounded-lg">
+              <Smartphone className="w-4 h-4 text-purple-600"/>
+            </div>
+            <span className="stat-label">Online</span>
+          </div>
+          <p className="stat-value text-purple-700">₹{today.onlinePaymentsTotal || 0}</p>
         </div>
       </div>
 
-      {/* Payment Breakdown (Crucial for Mobile Admin) */}
-      <section>
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3 pl-1">Payment Breakdown</h2>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          
-          <div className="p-4 flex items-center justify-between border-b border-gray-50 bg-green-50/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Banknote className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">Cash Collected</p>
-                <p className="text-xs text-gray-500">In-person payments</p>
-              </div>
+      {/* Pending Dues Banner */}
+      {(today.pendingPaymentsAmount > 0 || today.unpaidOrdersCount > 0) && (
+        <div className="admin-card flex items-center justify-between px-4 py-3 bg-amber-50/60 border-amber-200/60">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-amber-100 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-amber-600" />
             </div>
-            <p className="text-lg font-bold text-green-700">₹{today.cashPaymentsTotal || 0}</p>
-          </div>
-
-          <div className="p-4 flex items-center justify-between border-b border-gray-50 bg-blue-50/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Smartphone className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">Online Verified</p>
-                <p className="text-xs text-gray-500">UPI / Cards</p>
-              </div>
+            <div>
+              <p className="text-xs font-semibold text-amber-800">Pending Dues</p>
+              <p className="text-[11px] text-amber-600">{today.unpaidOrdersCount || 0} unpaid orders</p>
             </div>
-            <p className="text-lg font-bold text-blue-700">₹{today.onlinePaymentsTotal || 0}</p>
           </div>
-
-          <div className="p-4 flex items-center justify-between bg-yellow-50/30">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">Pending Dues</p>
-                <p className="text-xs text-yellow-600 font-medium">{today.unpaidOrdersCount || 0} unpaid orders</p>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-yellow-700">₹{today.pendingPaymentsAmount || 0}</p>
-          </div>
-
+          <p className="text-lg font-bold text-amber-700">₹{today.pendingPaymentsAmount || 0}</p>
         </div>
-      </section>
+      )}
 
-      {/* Top Sellers List View */}
-      <section>
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3 pl-1">Top Selling Items</h2>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2">
-          {topItems.length === 0 ? (
-            <p className="text-center text-gray-500 py-4 text-sm">No sales data yet</p>
-          ) : (
-            topItems.map((item, index) => (
-              <div key={item._id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                    index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                    index === 1 ? 'bg-gray-100 text-gray-600' :
-                    index === 2 ? 'bg-orange-100 text-orange-700' :
-                    'bg-slate-50 text-slate-500'
-                  }`}>
-                    #{index + 1}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-gray-800 text-sm">{item.name}</p>
-                    <p className="text-xs text-gray-500">{item.totalQuantity} items sold</p>
+      {/* Two-column layout: Top Sellers + Revenue Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Top Sellers */}
+        <section>
+          <h2 className="admin-section-title">Top Selling Items</h2>
+          <div className="admin-card p-1.5">
+            {topItems.length === 0 ? (
+              <p className="text-center text-gray-400 py-6 text-xs">No sales data yet</p>
+            ) : (
+              topItems.map((item, index) => (
+                <div key={item._id} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
+                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-600' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      'bg-slate-50 text-slate-400'
+                    }`}>
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-gray-800 text-xs leading-tight">{item.name}</p>
+                      <p className="text-[10px] text-gray-400">{item.totalQuantity} sold</p>
+                    </div>
                   </div>
+                  <span className="font-bold text-chocolate-600 text-xs">₹{item.totalRevenue}</span>
                 </div>
-                <span className="font-bold text-chocolate-600 text-sm">₹{item.totalRevenue}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+              ))
+            )}
+          </div>
+        </section>
 
-      {/* Revenue Trend (Hidden on very small screens to keep focus) */}
-      <section className="hidden sm:block">
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3 pl-1">7-Day Revenue Trend</h2>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 h-64">
-          <Line
-            data={revenueChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
-                x: { grid: { display: false } }
-              }
-            }}
-          />
-        </div>
-      </section>
-
+        {/* Revenue Trend */}
+        <section className="hidden sm:block">
+          <h2 className="admin-section-title">7-Day Revenue</h2>
+          <div className="admin-card p-3 h-[220px]">
+            <Line
+              data={revenueChartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: '#3A2218',
+                    titleFont: { size: 11 },
+                    bodyFont: { size: 11 },
+                    padding: 8,
+                    cornerRadius: 8,
+                  }
+                },
+                scales: {
+                  y: { 
+                    beginAtZero: true, 
+                    grid: { borderDash: [3, 3], color: 'rgba(0,0,0,0.04)' },
+                    ticks: { font: { size: 10 }, color: '#9ca3af' }
+                  },
+                  x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10 }, color: '#9ca3af' }
+                  }
+                }
+              }}
+            />
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

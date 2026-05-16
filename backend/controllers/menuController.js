@@ -2,6 +2,22 @@ const { MenuItem } = require('../models');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Transform a menu item's `image` field into a full URL.
+ * Handles: already-full URLs, default placeholder, and normal filenames.
+ */
+const withFullImageUrl = (item, req) => {
+  if (!item) return item;
+  const obj = item.toJSON ? item.toJSON() : { ...item };
+  if (obj.image && !obj.image.startsWith('http')) {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = req.get('host');
+    obj.image = `${protocol}://${host}/uploads/${obj.image}`;
+  }
+  return obj;
+};
+
+
 // @desc    Get all menu items
 // @route   GET /api/menu
 // @access  Public
@@ -17,11 +33,12 @@ exports.getMenuItems = async (req, res) => {
     if (special !== undefined) query.isSpecial = special === 'true';
 
     const menuItems = await MenuItem.find(query).sort({ category: 1, name: 1 });
+    const data = menuItems.map(item => withFullImageUrl(item, req));
     
     res.json({
       success: true,
-      count: menuItems.length,
-      data: menuItems
+      count: data.length,
+      data
     });
   } catch (error) {
     res.status(500).json({
@@ -47,7 +64,7 @@ exports.getMenuItem = async (req, res) => {
 
     res.json({
       success: true,
-      data: menuItem
+      data: withFullImageUrl(menuItem, req)
     });
   } catch (error) {
     res.status(500).json({
@@ -72,12 +89,12 @@ exports.createMenuItem = async (req, res) => {
 
     // Emit socket event for real-time update
     if (req.io) {
-      req.io.emit('menuUpdated', { action: 'create', item: menuItem });
+      req.io.emit('menuUpdated', { action: 'create', item: withFullImageUrl(menuItem, req) });
     }
 
     res.status(201).json({
       success: true,
-      data: menuItem
+      data: withFullImageUrl(menuItem, req)
     });
   } catch (error) {
     res.status(500).json({
@@ -123,12 +140,12 @@ exports.updateMenuItem = async (req, res) => {
 
     // Emit socket event for real-time update
     if (req.io) {
-      req.io.emit('menuUpdated', { action: 'update', item: menuItem });
+      req.io.emit('menuUpdated', { action: 'update', item: withFullImageUrl(menuItem, req) });
     }
 
     res.json({
       success: true,
-      data: menuItem
+      data: withFullImageUrl(menuItem, req)
     });
   } catch (error) {
     res.status(500).json({
@@ -189,10 +206,11 @@ exports.getMenuByCategories = async (req, res) => {
     const menu = {};
 
     for (const category of categories) {
-      menu[category] = await MenuItem.find({ 
+      const items = await MenuItem.find({ 
         category, 
         isAvailable: true 
       }).sort({ name: 1 });
+      menu[category] = items.map(item => withFullImageUrl(item, req));
     }
 
     res.json({
@@ -226,12 +244,12 @@ exports.toggleAvailability = async (req, res) => {
 
     // Emit socket event for real-time update
     if (req.io) {
-      req.io.emit('menuUpdated', { action: 'update', item: menuItem });
+      req.io.emit('menuUpdated', { action: 'update', item: withFullImageUrl(menuItem, req) });
     }
 
     res.json({
       success: true,
-      data: menuItem
+      data: withFullImageUrl(menuItem, req)
     });
   } catch (error) {
     res.status(500).json({

@@ -8,6 +8,26 @@ import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+/** Resolve image URL — API now returns full URLs; this handles legacy bare filenames too */
+const getImageUrl = (item) => {
+  if (!item.image) return getCategoryFallback(item.category);
+  if (item.image.startsWith('http')) return item.image;
+  return `${API_URL}/uploads/${item.image}`;
+};
+
+/** Category-specific fallback images (used only when the real image fails to load) */
+const getCategoryFallback = (category) => {
+  const fallbacks = {
+    cakes: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80',
+    brownies: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80',
+    specials: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80',
+    popsicles: 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&q=80',
+    bubble_waffles: 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=400&q=80',
+    savories: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80',
+  };
+  return fallbacks[category] || 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80';
+};
+
 const Menu = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [menuItems, setMenuItems] = useState([]);
@@ -307,12 +327,16 @@ const MenuCard = ({ item, index }) => {
         <div className="relative w-[118px] h-[100px] rounded-xl overflow-hidden bg-gray-50">
           <div className={`absolute inset-0 bg-gray-100 ${imageLoaded ? 'hidden' : 'block animate-pulse'}`}></div>
           <img
-            src={item.image?.startsWith('http') ? item.image : `${API_URL}/uploads/${item.image}`}
+            src={getImageUrl(item)}
             alt={item.name}
             className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
-              e.target.src = `https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=80`;
+              // Prevent infinite loop — only replace once
+              if (!e.target.dataset.fallback) {
+                e.target.dataset.fallback = 'true';
+                e.target.src = getCategoryFallback(item.category);
+              }
               setImageLoaded(true);
             }}
           />

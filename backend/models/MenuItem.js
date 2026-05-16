@@ -46,7 +46,9 @@ const menuItemSchema = new mongoose.Schema({
     trim: true
   }]
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Index for faster queries
@@ -54,3 +56,4 @@ menuItemSchema.index({ category: 1, isAvailable: 1 });
 menuItemSchema.index({ isBestSeller: 1 });
 
 module.exports = mongoose.model('MenuItem', menuItemSchema);
+

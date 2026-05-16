@@ -157,47 +157,53 @@ const Offers = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-chocolate-600"></div>
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-chocolate-600"></div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Offers & Discounts</h2>
+    <div className="pb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="admin-page-title font-display">Offers & Coupons</h1>
+          <p className="text-[11px] text-gray-400 mt-0.5">{offers.length} coupon{offers.length !== 1 ? 's' : ''}</p>
+        </div>
         <button
           onClick={() => openModal()}
-          className="flex items-center space-x-2 px-4 py-2 bg-chocolate-500 text-white rounded-lg hover:bg-chocolate-600"
+          className="admin-btn admin-btn-primary"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Create Offer</span>
         </button>
       </div>
 
-      {/* Offers Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Offers Grid — 2x2 layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
         {offers.map((offer) => (
           <motion.div
             key={offer._id}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`bg-white rounded-xl p-6 shadow-sm border-2 ${
-              isOfferValid(offer) ? 'border-green-200' : 'border-gray-200 opacity-60'
+            className={`admin-card p-3.5 relative overflow-hidden ${
+              !isOfferValid(offer) ? 'opacity-50' : ''
             }`}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-10 h-10 bg-chocolate-100 rounded-lg flex items-center justify-center">
-                  <Tag className="w-5 h-5 text-chocolate-600" />
+            {/* Decorative corner */}
+            <div className={`absolute top-0 right-0 w-12 h-12 ${isOfferValid(offer) ? 'bg-green-50' : 'bg-gray-50'} rounded-bl-[2rem]`}></div>
+            
+            {/* Header */}
+            <div className="flex items-start justify-between mb-2 relative">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${isOfferValid(offer) ? 'bg-chocolate-100' : 'bg-gray-100'}`}>
+                  <Tag className={`w-3.5 h-3.5 ${isOfferValid(offer) ? 'text-chocolate-600' : 'text-gray-400'}`} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800">{offer.code}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    isOfferValid(offer)
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
+                  <h3 className="font-bold text-gray-800 text-xs tracking-wide">{offer.code}</h3>
+                  <span className={`admin-badge ${
+                    isOfferValid(offer) ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
                   }`}>
                     {isOfferValid(offer) ? 'Active' : 'Expired'}
                   </span>
@@ -205,65 +211,59 @@ const Offers = () => {
               </div>
               <button
                 onClick={() => toggleOffer(offer._id)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-300 hover:text-gray-500 transition-colors relative z-10"
               >
                 {offer.isActive ? (
-                  <ToggleRight className="w-6 h-6 text-green-500" />
+                  <ToggleRight className="w-5 h-5 text-green-500" />
                 ) : (
-                  <ToggleLeft className="w-6 h-6" />
+                  <ToggleLeft className="w-5 h-5" />
                 )}
               </button>
             </div>
 
-            <p className="text-gray-600 text-sm mb-4">{offer.description}</p>
+            <p className="text-[11px] text-gray-500 mb-2.5 line-clamp-1">{offer.description}</p>
 
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Discount</span>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] mb-3">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Discount</span>
                 <span className="font-semibold text-chocolate-600">
-                  {offer.discountType === 'percentage'
-                    ? `${offer.discountValue}%`
-                    : `₹${offer.discountValue}`}
+                  {offer.discountType === 'percentage' ? `${offer.discountValue}%` : `₹${offer.discountValue}`}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Used</span>
+                <span className="font-medium text-gray-700">
+                  {offer.usedCount}{offer.usageLimit ? `/${offer.usageLimit}` : ''}
                 </span>
               </div>
               {offer.minOrderAmount > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Min Order</span>
-                  <span className="text-gray-800">₹{offer.minOrderAmount}</span>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Min</span>
+                  <span className="text-gray-700">₹{offer.minOrderAmount}</span>
                 </div>
               )}
-              {offer.maxDiscount && (
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500">Max Discount</span>
-                  <span className="text-gray-800">₹{offer.maxDiscount}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Valid Until</span>
-                <span className="text-gray-800">
-                  {new Date(offer.validUntil).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-500">Used</span>
-                <span className="text-gray-800">
-                  {offer.usedCount} {offer.usageLimit ? `/ ${offer.usageLimit}` : ''}
+              <div className="flex justify-between">
+                <span className="text-gray-400">Expires</span>
+                <span className="text-gray-700">
+                  {new Date(offer.validUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 mt-4 pt-4 border-t">
+            {/* Actions */}
+            <div className="flex justify-end gap-1 pt-2 border-t border-gray-100">
               <button
                 onClick={() => openModal(offer)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3 h-3" />
               </button>
               <button
                 onClick={() => handleDelete(offer._id)}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3 h-3" />
               </button>
             </div>
           </motion.div>
@@ -271,13 +271,13 @@ const Offers = () => {
       </div>
 
       {offers.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl">
-          <Tag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No offers created yet</p>
+        <div className="text-center py-12 admin-card">
+          <Tag className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+          <p className="text-xs text-gray-400">No offers created yet</p>
         </div>
       )}
 
-      {/* Modal */}
+      {/* ─── Create/Edit Modal ─── */}
       <AnimatePresence>
         {isModalOpen && (
           <>
@@ -285,168 +285,153 @@ const Offers = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
+              className="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-50"
               onClick={closeModal}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-x-4 top-10 bottom-10 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-white rounded-2xl shadow-xl z-50 overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-x-3 top-8 bottom-8 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-white rounded-xl shadow-xl z-50 overflow-hidden flex flex-col"
             >
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="text-lg font-semibold text-gray-800">
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50/50">
+                <h3 className="text-sm font-bold text-gray-800">
                   {editingOffer ? 'Edit Offer' : 'Create Offer'}
                 </h3>
-                <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-lg">
-                  <X className="w-5 h-5" />
+                <button onClick={closeModal} className="p-1 hover:bg-gray-100 rounded-md">
+                  <X className="w-4 h-4 text-gray-400" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                <div className="space-y-4">
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Coupon Code *
-                    </label>
+                    <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Coupon Code *</label>
                     <input
                       type="text"
                       value={formData.code}
                       onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                       placeholder="e.g., WELCOME10"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                      className="admin-input"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description *
-                    </label>
+                    <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Description *</label>
                     <input
                       type="text"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="e.g., 10% off on first order"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                      className="admin-input"
                       required
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Discount Type
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</label>
                       <select
                         value={formData.discountType}
                         onChange={(e) => setFormData({ ...formData, discountType: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                       >
                         <option value="percentage">Percentage</option>
                         <option value="flat">Flat Amount</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Value *
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Value *</label>
                       <input
                         type="number"
                         value={formData.discountValue}
                         onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
                         placeholder={formData.discountType === 'percentage' ? '10' : '50'}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                         min="0"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Min Order Amount
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Min Order</label>
                       <input
                         type="number"
                         value={formData.minOrderAmount}
                         onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
                         placeholder="0"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                         min="0"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Max Discount
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Max Discount</label>
                       <input
                         type="number"
                         value={formData.maxDiscount}
                         onChange={(e) => setFormData({ ...formData, maxDiscount: e.target.value })}
                         placeholder="100"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                         min="0"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Valid Until *
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Valid Until *</label>
                       <input
                         type="date"
                         value={formData.validUntil}
                         onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Usage Limit
-                      </label>
+                      <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Usage Limit</label>
                       <input
                         type="number"
                         value={formData.usageLimit}
                         onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
                         placeholder="Unlimited"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-500"
+                        className="admin-input"
                         min="0"
                       />
                     </div>
                   </div>
 
-                  <label className="flex items-center space-x-2">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-chocolate-500 focus:ring-chocolate-500"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-chocolate-500 focus:ring-chocolate-500"
                     />
-                    <span className="text-sm text-gray-700">Active</span>
+                    <span className="text-xs text-gray-600">Active</span>
                   </label>
                 </div>
 
-                <div className="mt-6 flex space-x-3">
+                <div className="mt-4 flex gap-2">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50"
+                    className="flex-1 px-3 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 text-xs font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-chocolate-500 text-white rounded-lg hover:bg-chocolate-600 disabled:opacity-50"
+                    className="flex-1 admin-btn admin-btn-primary justify-center"
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         <span>Saving...</span>
                       </>
                     ) : (

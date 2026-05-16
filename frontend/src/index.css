@@ -295,3 +295,319 @@
 .cursor-elegant {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='4' fill='%23D4A833'/%3E%3C/svg%3E") 12 12, auto;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM ADMIN PANEL STYLES
+   Dear Desserts — Luxury Café Admin Experience
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Admin Layout Base */
+.admin-panel {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-panel h1 { font-size: 1.25rem; }
+.admin-panel h2 { font-size: 1rem; }
+.admin-panel h3 { font-size: 0.875rem; }
+
+/* Admin Sidebar */
+.admin-sidebar {
+  background: linear-gradient(180deg, #3A2218 0%, #2D1A13 60%, #1A0F0B 100%);
+  box-shadow: 4px 0 20px rgba(26, 15, 11, 0.15);
+}
+
+.admin-sidebar .nav-link {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.65);
+  position: relative;
+}
+
+.admin-sidebar .nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+}
+
+.admin-sidebar .nav-link.active {
+  background: linear-gradient(135deg, #7C4A32, #5D3727);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(124, 74, 50, 0.3);
+}
+
+.admin-sidebar .nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #D4A833;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Admin Card System */
+.admin-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);
+  transition: all 0.25s ease;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
+
+/* Stat Cards */
+.admin-stat-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+}
+
+.admin-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.admin-stat-card .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.admin-stat-card .stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+/* Admin Buttons */
+.admin-btn {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 9px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.admin-btn-primary {
+  background: linear-gradient(135deg, #7C4A32, #5D3727);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 6px rgba(93, 55, 39, 0.2);
+}
+
+.admin-btn-primary:hover {
+  background: linear-gradient(135deg, #5D3727, #4A2C1F);
+  box-shadow: 0 4px 12px rgba(93, 55, 39, 0.3);
+  transform: translateY(-1px);
+}
+
+.admin-btn-outline {
+  background: transparent;
+  color: #5D3727;
+  border: 1px solid rgba(93, 55, 39, 0.25);
+}
+
+.admin-btn-outline:hover {
+  background: rgba(93, 55, 39, 0.05);
+  border-color: rgba(93, 55, 39, 0.4);
+}
+
+/* Admin Inputs */
+.admin-input {
+  font-size: 13px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  transition: all 0.2s ease;
+  background: #fff;
+  width: 100%;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #7C4A32;
+  box-shadow: 0 0 0 3px rgba(124, 74, 50, 0.1);
+}
+
+/* Admin Badge */
+.admin-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Admin Table */
+.admin-table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.admin-table thead {
+  background: #f9fafb;
+}
+
+.admin-table th {
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ca3af;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.admin-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: #faf7f5;
+}
+
+/* Admin Section Headers */
+.admin-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+/* Admin Page Title */
+.admin-page-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+/* Category Filter Pills */
+.admin-filter-pill {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.admin-filter-pill.active {
+  background: linear-gradient(135deg, #7C4A32, #5D3727);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(93, 55, 39, 0.2);
+}
+
+.admin-filter-pill:not(.active) {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.admin-filter-pill:not(.active):hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .admin-panel {
+    font-size: 12.5px;
+  }
+
+  .admin-stat-card {
+    padding: 12px 14px;
+  }
+
+  .admin-stat-card .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .admin-card {
+    border-radius: 12px;
+  }
+
+  /* Mobile filter scroll */
+  .admin-filters-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .admin-filters-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Notification Dot Pulse */
+@keyframes notifPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.notif-pulse {
+  animation: notifPulse 2s ease-in-out infinite;
+}
+
+/* Admin Mobile Header */
+.admin-mobile-header {
+  background: linear-gradient(135deg, #3A2218, #2D1A13);
+  border-bottom: 1px solid rgba(212, 168, 51, 0.15);
+}
+
+/* Premium scrollbar for admin */
+.admin-panel ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.admin-panel ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-panel ::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+  border-radius: 10px;
+}
+
+.admin-panel ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}

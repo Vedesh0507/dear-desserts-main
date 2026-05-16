@@ -37,53 +37,55 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-chocolate-700 to-chocolate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #3A2218 0%, #2D1A13 40%, #1A0F0B 100%)' }}>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-sm"
       >
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-caramel-400 to-caramel-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-white font-display font-bold text-2xl">D</span>
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 bg-gradient-to-br from-gold-400 to-gold-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-gold">
+            <span className="text-white font-display font-bold text-xl">D</span>
           </div>
-          <h1 className="text-3xl font-display font-bold text-white">Dear Desserts</h1>
-          <p className="text-chocolate-200 mt-2">Admin Portal</p>
+          <h1 className="text-2xl font-display font-bold text-cream-100">Dear Desserts</h1>
+          <p className="text-gold-400 text-xs mt-1 tracking-wider uppercase font-medium">Admin Portal</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-elevated p-8">
-          <h2 className="text-2xl font-display font-bold text-chocolate-700 text-center mb-6">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-elevated p-6">
+          <h2 className="text-lg font-display font-bold text-chocolate-700 text-center mb-5">
             Welcome Back
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="label">Email Address</label>
+              <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="input"
+                className="admin-input"
               />
             </div>
 
             <div>
-              <label className="label">Password</label>
+              <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="input pr-12"
+                  className="admin-input pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-chocolate-400 hover:text-chocolate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
@@ -91,22 +93,22 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full flex items-center justify-center space-x-2"
+              className="w-full py-2.5 rounded-xl font-semibold text-sm text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #7C4A32, #5D3727)' }}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Signing in...</span>
                 </>
               ) : (
                 <>
-                  <LogIn className="w-5 h-5" />
+                  <LogIn className="w-4 h-4" />
                   <span>Sign In</span>
                 </>
               )}
             </button>
           </form>
-
         </div>
       </motion.div>
     </div>

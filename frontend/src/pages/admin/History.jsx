@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  Search, 
-  Filter, 
-  Calendar,
-  ChevronDown,
-  Hash,
-  Banknote,
-  Smartphone,
-  CheckCircle,
-  AlertCircle
+  Calendar, Banknote, Smartphone
 } from 'lucide-react';
 import { orderAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -19,131 +11,71 @@ const History = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [page]);
+  useEffect(() => { fetchHistory(); }, [page]);
 
   const fetchHistory = async () => {
     try {
-      const response = await orderAPI.getAll({ 
-        status: 'completed', 
-        limit: 20, 
-        page 
-      });
-      
+      const response = await orderAPI.getAll({ status: 'completed', limit: 20, page });
       const newOrders = response.data.data;
-      if (page === 1) {
-        setOrders(newOrders);
-      } else {
-        setOrders(prev => [...prev, ...newOrders]);
-      }
-      
+      if (page === 1) setOrders(newOrders);
+      else setOrders(prev => [...prev, ...newOrders]);
       setHasMore(response.data.page < response.data.pages);
     } catch (error) {
       console.error('Failed to fetch order history:', error);
       toast.error('Failed to load history');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const handleLoadMore = () => {
-    setPage(p => p + 1);
-  };
-
-  const getPaymentStatusColor = (status) => {
-    if (['paid', 'online_verified', 'cash_received'].includes(status)) {
-      return 'text-green-700 bg-green-100';
-    }
-    return 'text-yellow-700 bg-yellow-100';
-  };
+  const psc = (s) => ['paid','online_verified','cash_received'].includes(s) ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700';
 
   if (loading && page === 1) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-chocolate-600"></div>
-      </div>
-    );
+    return (<div className="flex justify-center items-center h-48"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-chocolate-600"></div></div>);
   }
 
   return (
-    <div className="max-w-2xl mx-auto pb-20">
-      <div className="sticky top-0 bg-gray-50/90 backdrop-blur-md z-10 py-4 -mt-4 border-b mb-6">
-        <h1 className="text-2xl font-display font-bold text-gray-800">Order History</h1>
-        <p className="text-sm text-gray-500">Chronological digital receipts</p>
+    <div className="max-w-3xl mx-auto pb-6">
+      <div className="sticky top-0 bg-[#f8f6f3]/90 backdrop-blur-md z-10 py-3 -mt-3 border-b border-gray-200/50 mb-4">
+        <h1 className="admin-page-title font-display">Order History</h1>
+        <p className="text-[11px] text-gray-400 mt-0.5">{orders.length} completed orders</p>
       </div>
-
-      <div className="space-y-4">
+      <div className="space-y-2">
         {orders.map((order) => (
-          <div key={order._id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm relative overflow-hidden group">
-            {/* Left accent bar */}
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gray-300"></div>
-            
-            <div className="pl-2">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-bold text-xl text-gray-800">
-                    Token #{order.tokenNumber}
-                  </span>
-                  <span className="text-xs text-gray-400 font-mono mt-0.5">
-                    {order.orderNumber}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg text-chocolate-700 leading-none">
-                    ₹{order.total}
-                  </p>
-                </div>
+          <div key={order._id} className="admin-card p-3 border-l-[3px] border-l-gray-300">
+            <div className="flex justify-between items-center mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="font-display font-bold text-sm text-gray-800">Token #{order.tokenNumber}</span>
+                <span className="text-[9px] text-gray-300 font-mono">{order.orderNumber}</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-3">
-                <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Time</p>
-                  <p className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(order.createdAt).toLocaleDateString()} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Payment</p>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 text-sm font-medium text-gray-700 capitalize">
-                      {order.paymentMethod === 'cash' ? <Banknote className="w-3 h-3 text-blue-500" /> : <Smartphone className="w-3 h-3 text-purple-500" />}
-                      {order.paymentMethod}
-                    </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${getPaymentStatusColor(order.paymentStatus)}`}>
-                      {order.paymentStatus.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
+              <span className="font-bold text-sm text-chocolate-700">₹{order.total}</span>
+            </div>
+            <div className="flex justify-between items-center mb-1.5 text-[11px]">
+              <span className="text-gray-400 flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                {new Date(order.createdAt).toLocaleDateString()} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="flex items-center gap-0.5 text-gray-500 capitalize font-medium">
+                  {order.paymentMethod === 'cash' ? <Banknote className="w-3 h-3 text-emerald-500" /> : <Smartphone className="w-3 h-3 text-purple-500" />}
+                  {order.paymentMethod}
+                </span>
+                <span className={`admin-badge ${psc(order.paymentStatus)}`}>{order.paymentStatus.replace('_', ' ')}</span>
               </div>
-
-              <div className="bg-gray-50 rounded-lg p-2 text-sm text-gray-600 border border-gray-100">
-                <p className="font-medium text-gray-800 mb-1">{order.customer?.name}</p>
-                <p className="truncate text-xs text-gray-500">
-                  {order.items?.map(i => `${i.quantity}x ${i.name}`).join(', ')}
-                </p>
-              </div>
+            </div>
+            <div className="bg-gray-50 rounded-md p-2 text-[11px]">
+              <span className="font-medium text-gray-700">{order.customer?.name}</span>
+              <span className="text-gray-400 mx-1.5">·</span>
+              <span className="text-gray-400">{order.items?.map(i => `${i.quantity}× ${i.name}`).join(', ')}</span>
             </div>
           </div>
         ))}
       </div>
-
       {hasMore && (
-        <div className="mt-8 text-center">
-          <button 
-            onClick={handleLoadMore}
-            className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm"
-          >
-            Load Older Orders
-          </button>
+        <div className="mt-6 text-center">
+          <button onClick={() => setPage(p => p + 1)} className="admin-btn admin-btn-outline">Load Older Orders</button>
         </div>
       )}
-
       {orders.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No completed orders found.</p>
-        </div>
+        <div className="text-center py-12 admin-card"><p className="text-xs text-gray-400">No completed orders found.</p></div>
       )}
     </div>
   );

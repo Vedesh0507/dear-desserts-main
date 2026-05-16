@@ -1,9 +1,9 @@
 const { User } = require('../models');
 const { generateToken } = require('../middleware/auth');
 
-// @desc    Register user
+// @desc    Register user (admin only — first user is bootstrapped)
 // @route   POST /api/auth/register
-// @access  Public (first admin) / Admin only
+// @access  Private/Admin
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role, phone } = req.body;
@@ -11,11 +11,11 @@ exports.register = async (req, res) => {
     // Check if any admin exists
     const adminExists = await User.findOne({ role: 'admin' });
     
-    // If admin exists and trying to create admin, require authentication
-    if (adminExists && role === 'admin' && (!req.user || req.user.role !== 'admin')) {
+    // If admin exists, require authenticated admin to create users
+    if (adminExists && (!req.user || req.user.role !== 'admin')) {
       return res.status(403).json({
         success: false,
-        message: 'Only admins can create admin accounts'
+        message: 'Only admins can create user accounts'
       });
     }
 
@@ -25,6 +25,13 @@ exports.register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'User already exists with this email'
+      });
+    }
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
       });
     }
 
@@ -136,12 +143,26 @@ exports.getMe = async (req, res) => {
   }
 };
 
-// @desc    Update password
+// @desc    Update own password (logged-in user changes their own password)
 // @route   PUT /api/auth/password
 // @access  Private
 exports.updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide current and new password'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
 
     const user = await User.findById(req.user._id).select('+password');
 
@@ -190,12 +211,20 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// @desc    Update user (admin only)
+/**
+ * Helper: get the original owner (first admin account created).
+ * Protected from deletion, deactivation, and role changes.
+ */
+const getOwner = async () => {
+  return User.findOne({ role: 'admin' }).sort({ createdAt: 1 });
+};
+
+// @desc    Update user profile (admin only — NO password changes here)
 // @route   PUT /api/auth/users/:id
 // @access  Private/Admin
 exports.updateUser = async (req, res) => {
   try {
-    const { name, email, role, isActive, phone, password } = req.body;
+    const { name, email, role, isActive, phone } = req.body;
 
     const user = await User.findById(req.params.id);
 
@@ -206,19 +235,30 @@ exports.updateUser = async (req, res) => {
       });
     }
 
-    // Update fields if provided
+    // Owner protection: prevent demoting or deactivating the owner
+    const owner = await getOwner();
+    if (owner && user._id.equals(owner._id)) {
+      if (role && role !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Cannot change the owner\'s role'
+        });
+      }
+      if (isActive === false) {
+        return res.status(403).json({
+          success: false,
+          message: 'Cannot deactivate the owner account'
+        });
+      }
+    }
+
+    // Update fields if provided (password is deliberately excluded)
     if (name) user.name = name;
     if (email) user.email = email;
     if (role) user.role = role;
     if (isActive !== undefined) user.isActive = isActive;
     if (phone !== undefined) user.phone = phone;
 
-    // Only update password if provided and not empty
-    if (password && password.trim() !== '') {
-      user.password = password;
-    }
-
-    // Using .save() instead of findByIdAndUpdate to trigger pre-save hooks (password hashing)
     await user.save();
 
     res.json({
@@ -231,6 +271,99 @@ exports.updateUser = async (req, res) => {
         isActive: user.isActive,
         phone: user.phone
       }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Admin resets another user's password (secure reset)
+// @route   PUT /api/auth/users/:id/reset-password
+// @access  Private/Admin
+exports.resetUserPassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters'
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Don't allow resetting owner's password via this route
+    // Owner must change their own password from Settings
+    const owner = await getOwner();
+    if (owner && user._id.equals(owner._id) && !req.user._id.equals(owner._id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Owner password can only be changed from Settings'
+      });
+    }
+
+    user.password = newPassword; // Will be hashed by pre-save hook
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Delete user (admin only)
+// @route   DELETE /api/auth/users/:id
+// @access  Private/Admin
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Prevent deleting yourself
+    if (user._id.equals(req.user._id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot delete your own account'
+      });
+    }
+
+    // Owner protection
+    const owner = await getOwner();
+    if (owner && user._id.equals(owner._id)) {
+      return res.status(403).json({
+        success: false,
+        message: 'The owner account cannot be deleted'
+      });
+    }
+
+    await user.deleteOne();
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
     });
   } catch (error) {
     res.status(500).json({

@@ -97,192 +97,172 @@ const Orders = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusConfig = (status) => {
     switch(status) {
-      case 'new': return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700 border border-blue-200">NEW</span>;
-      case 'preparing': return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200">PREPARING</span>;
-      case 'ready': return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 border border-green-200">READY</span>;
-      case 'completed': return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700 border border-gray-200">COMPLETED</span>;
-      default: return null;
+      case 'new': return { label: 'NEW', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' };
+      case 'preparing': return { label: 'PREP', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' };
+      case 'ready': return { label: 'READY', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' };
+      case 'completed': return { label: 'DONE', bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', dot: 'bg-gray-400' };
+      default: return { label: status, bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200', dot: 'bg-gray-400' };
     }
   };
 
-  const renderOrderCard = (order, isCompleted = false) => (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      key={order._id}
-      className={`bg-white rounded-2xl shadow-sm border p-4 lg:p-5 transition-shadow hover:shadow-md ${
-        order.status === 'new' ? 'border-blue-200 shadow-blue-100/50' :
-        order.status === 'preparing' ? 'border-yellow-200 shadow-yellow-100/50' :
-        order.status === 'ready' ? 'border-green-200 shadow-green-100/50' :
-        'border-gray-100 opacity-80'
-      }`}
-    >
-      {/* Header */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-gold-50 rounded-xl flex items-center justify-center border border-gold-100">
-            <Hash className="w-5 h-5 text-gold-600" />
+  const renderOrderCard = (order) => {
+    const sc = getStatusConfig(order.status);
+    
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        key={order._id}
+        className={`admin-card p-3 border-l-[3px] ${
+          order.status === 'new' ? 'border-l-blue-500' :
+          order.status === 'preparing' ? 'border-l-amber-500' :
+          order.status === 'ready' ? 'border-l-green-500' :
+          'border-l-gray-300'
+        }`}
+      >
+        {/* Header Row */}
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-display font-bold text-chocolate-800">
+              #{order.tokenNumber}
+            </span>
+            <span className={`admin-badge ${sc.bg} ${sc.text}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
+              {sc.label}
+            </span>
           </div>
-          <div>
-            <h3 className="text-2xl font-display font-bold text-chocolate-800 leading-none">
-              {order.tokenNumber}
-            </h3>
-            <p className="text-xs text-gray-400 font-mono mt-1">ID: {order.orderNumber}</p>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          {getStatusBadge(order.status)}
-          <span className="text-xs text-gray-400 font-medium">
+          <span className="text-[10px] text-gray-400 font-medium">
             {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
-      </div>
 
-      {/* Customer & Items */}
-      <div className="mb-4 bg-gray-50 rounded-xl p-3">
-        <p className="font-medium text-gray-800 mb-2 truncate text-sm">
-          {order.customer?.name}
-        </p>
-        <ul className="space-y-1">
-          {order.items?.map((item, index) => (
-            <li key={index} className="text-sm text-gray-600 flex justify-between">
-              <span className="truncate pr-2">
-                <span className="font-semibold text-gray-800">{item.quantity}x</span> {item.name}
-              </span>
-              <span className="font-medium">₹{item.subtotal}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Payment Info */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-gray-400 uppercase tracking-wider">Payment</span>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700 capitalize">
-            {order.paymentMethod === 'cash' ? <Banknote className="w-4 h-4 text-blue-500" /> : <Smartphone className="w-4 h-4 text-purple-500" />}
-            {order.paymentMethod}
+        {/* Customer & Items */}
+        <div className="bg-gray-50 rounded-lg p-2 mb-2">
+          <p className="font-medium text-gray-700 text-xs mb-1 truncate">{order.customer?.name}</p>
+          <div className="space-y-0.5">
+            {order.items?.map((item, index) => (
+              <div key={index} className="text-[11px] text-gray-500 flex justify-between">
+                <span className="truncate pr-2">
+                  <span className="font-semibold text-gray-700">{item.quantity}×</span> {item.name}
+                </span>
+                <span className="font-medium text-gray-600 flex-shrink-0">₹{item.subtotal}</span>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-xs text-gray-400 uppercase tracking-wider">Status</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+
+        {/* Payment Row */}
+        <div className="flex items-center justify-between mb-2 text-[11px]">
+          <div className="flex items-center gap-1 text-gray-500">
+            {order.paymentMethod === 'cash' ? <Banknote className="w-3.5 h-3.5 text-emerald-500" /> : <Smartphone className="w-3.5 h-3.5 text-purple-500" />}
+            <span className="capitalize font-medium">{order.paymentMethod}</span>
+          </div>
+          <span className={`admin-badge ${
             ['paid', 'online_verified', 'cash_received'].includes(order.paymentStatus)
-              ? 'bg-green-100 text-green-700'
-              : 'bg-yellow-100 text-yellow-700'
+              ? 'bg-green-50 text-green-700'
+              : 'bg-amber-50 text-amber-700'
           }`}>
             {order.paymentStatus?.replace('_', ' ')}
           </span>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      {!isCompleted && (
-        <div className="space-y-3">
-          {/* Status Progression */}
-          <div className="flex gap-2">
-            {order.status === 'new' && (
-              <button
-                onClick={() => handleStatusUpdate(order._id, 'preparing')}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-medium transition-colors text-sm"
-              >
-                <ChefHat className="w-4 h-4" /> Start Preparing
-              </button>
-            )}
-            {order.status === 'preparing' && (
-              <button
-                onClick={() => handleStatusUpdate(order._id, 'ready')}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors text-sm"
-              >
-                <CheckCircle className="w-4 h-4" /> Mark Ready
-              </button>
-            )}
-            {order.status === 'ready' && (
-              <button
-                onClick={() => handleStatusUpdate(order._id, 'completed')}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-medium transition-colors text-sm"
-              >
-                <CheckSquare className="w-4 h-4" /> Complete Order
-              </button>
-            )}
-          </div>
+        {/* Action Buttons */}
+        <div className="space-y-1.5">
+          {order.status === 'new' && (
+            <button
+              onClick={() => handleStatusUpdate(order._id, 'preparing')}
+              className="w-full flex items-center justify-center gap-1.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition-colors text-xs"
+            >
+              <ChefHat className="w-3.5 h-3.5" /> Start Preparing
+            </button>
+          )}
+          {order.status === 'preparing' && (
+            <button
+              onClick={() => handleStatusUpdate(order._id, 'ready')}
+              className="w-full flex items-center justify-center gap-1.5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-colors text-xs"
+            >
+              <CheckCircle className="w-3.5 h-3.5" /> Mark Ready
+            </button>
+          )}
+          {order.status === 'ready' && (
+            <button
+              onClick={() => handleStatusUpdate(order._id, 'completed')}
+              className="w-full flex items-center justify-center gap-1.5 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-semibold transition-colors text-xs"
+            >
+              <CheckSquare className="w-3.5 h-3.5" /> Complete
+            </button>
+          )}
 
           {/* Payment Verification */}
           {order.paymentStatus === 'pending' && (
-            <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <div className="flex gap-1.5 pt-1 border-t border-gray-100">
               {order.paymentMethod !== 'cash' && (
                 <button
                   onClick={() => handlePaymentUpdate(order._id, 'online_verified')}
-                  className="flex-1 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-xs font-medium hover:bg-green-100 transition-colors"
+                  className="flex-1 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-[10px] font-semibold hover:bg-green-100 transition-colors"
                 >
                   Verify Online
                 </button>
               )}
               <button
                 onClick={() => handlePaymentUpdate(order._id, 'cash_received')}
-                className="flex-1 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-medium hover:bg-blue-100 transition-colors"
+                className="flex-1 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-semibold hover:bg-blue-100 transition-colors"
               >
                 Cash Received
               </button>
             </div>
           )}
         </div>
-      )}
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-chocolate-600"></div>
+      <div className="flex justify-center items-center h-48">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-chocolate-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <div className="flex items-center justify-between mb-6 sticky top-0 bg-gray-50/90 backdrop-blur-md z-10 py-4 -mt-4 border-b">
+    <div className="max-w-5xl mx-auto pb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 sticky top-0 bg-[#f8f6f3]/90 backdrop-blur-md z-10 py-3 -mt-3 border-b border-gray-200/50">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-800">Live Kitchen Queue</h1>
-          <p className="text-sm text-gray-500">Manage active tokens & payments</p>
+          <h1 className="admin-page-title font-display">Live Kitchen Queue</h1>
+          <p className="text-[11px] text-gray-400 mt-0.5">Manage active tokens & payments</p>
         </div>
-        <button
-          onClick={fetchOrders}
-          className="p-2.5 bg-white text-chocolate-600 hover:bg-chocolate-50 rounded-xl shadow-sm border transition-colors"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="admin-badge bg-chocolate-100 text-chocolate-700">
+            {activeOrders.length} active
+          </span>
+          <button
+            onClick={fetchOrders}
+            className="p-2 bg-white text-chocolate-600 hover:bg-chocolate-50 rounded-lg border border-gray-200 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-8">
-        {/* Active Orders Section */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg font-bold text-gray-800 uppercase tracking-wide">Active Queue</h2>
-            <span className="px-2.5 py-0.5 bg-chocolate-100 text-chocolate-700 rounded-full text-sm font-bold">
-              {activeOrders.length}
-            </span>
-          </div>
-
-          {activeOrders.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
-              <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">No active orders</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <AnimatePresence mode="popLayout">
-                {activeOrders.map(order => renderOrderCard(order, false))}
-              </AnimatePresence>
-            </div>
-          )}
-        </section>
-
-      </div>
+      {/* Orders Grid */}
+      {activeOrders.length === 0 ? (
+        <div className="text-center py-16 admin-card">
+          <Package className="w-10 h-10 text-gray-200 mx-auto mb-2" />
+          <p className="text-xs text-gray-400 font-medium">No active orders</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <AnimatePresence mode="popLayout">
+            {activeOrders.map(order => renderOrderCard(order))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };

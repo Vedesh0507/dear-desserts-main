@@ -47,6 +47,8 @@ export const authAPI = {
   updatePassword: (data) => api.put('/auth/password', data),
   getUsers: () => api.get('/auth/users'),
   updateUser: (id, data) => api.put(`/auth/users/${id}`, data),
+  resetPassword: (id, newPassword) => api.put(`/auth/users/${id}/reset-password`, { newPassword }),
+  deleteUser: (id) => api.delete(`/auth/users/${id}`),
 };
 
 // Menu APIs
@@ -86,6 +88,7 @@ export const analyticsAPI = {
   getTopItems: (params) => api.get('/analytics/top-items', { params }),
   getCustomers: () => api.get('/analytics/customers'),
   getCategories: () => api.get('/analytics/categories'),
+  getComprehensive: (params) => api.get('/analytics/comprehensive', { params }),
 };
 
 // Offer APIs

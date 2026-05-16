@@ -168,7 +168,12 @@ const Home = () => {
                   <div className="relative h-[280px] md:h-[320px] rounded-xl overflow-hidden bg-chocolate-900 border border-white/5">
                     <img src={item.image?.startsWith('http') ? item.image : `${API_URL}/uploads/${item.image}`} alt={item.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&q=80'; }} />
+                      onError={(e) => {
+                        if (!e.target.dataset.fallback) {
+                          e.target.dataset.fallback = 'true';
+                          e.target.src = 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&q=80';
+                        }
+                      }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-chocolate-950 via-chocolate-950/30 to-transparent"></div>
                     <div className="absolute top-3 right-3">
                       <div className="px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-gold-400 bg-black/40 backdrop-blur-sm border border-gold-400/20 flex items-center gap-1">

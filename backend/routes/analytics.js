@@ -6,7 +6,8 @@ const {
   getPeakHours,
   getTopItems,
   getCustomerAnalytics,
-  getCategoryAnalytics
+  getCategoryAnalytics,
+  getComprehensiveAnalytics
 } = require('../controllers/analyticsController');
 const { protect } = require('../middleware/auth');
 
@@ -18,5 +19,6 @@ router.get('/peak-hours', getPeakHours);
 router.get('/top-items', getTopItems);
 router.get('/customers', getCustomerAnalytics);
 router.get('/categories', getCategoryAnalytics);
+router.get('/comprehensive', getComprehensiveAnalytics);
 
 module.exports = router;

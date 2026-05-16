@@ -60,7 +60,7 @@ const Cart = () => {
                 <div className="flex gap-3">
                   <img src={item.image?.startsWith('http') ? item.image : `${API_URL}/uploads/${item.image}`} alt={item.name}
                     className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&q=80'; }} />
+                    onError={(e) => { if (!e.target.dataset.fallback) { e.target.dataset.fallback = 'true'; e.target.src = 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&q=80'; } }} />
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <div>

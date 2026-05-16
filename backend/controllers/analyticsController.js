@@ -319,3 +319,116 @@ exports.getCategoryAnalytics = async (req, res) => {
     });
   }
 };
+
+// @desc    Get comprehensive analytics based on date and period
+// @route   GET /api/analytics/comprehensive
+// @access  Private
+exports.getComprehensiveAnalytics = async (req, res) => {
+  try {
+    const { date, period = 'day' } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+    
+    let startDate = new Date(targetDate);
+    let endDate = new Date(targetDate);
+    let groupFormat;
+
+    if (period === 'day') {
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      groupFormat = { $hour: '$createdAt' };
+    } else if (period === 'week') {
+      startDate.setDate(targetDate.getDate() - targetDate.getDay());
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      endDate.setHours(23, 59, 59, 999);
+      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+    } else if (period === 'month') {
+      startDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+      endDate = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+      endDate.setHours(23, 59, 59, 999);
+      groupFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
+    } else if (period === 'year') {
+      startDate = new Date(targetDate.getFullYear(), 0, 1);
+      endDate = new Date(targetDate.getFullYear(), 11, 31);
+      endDate.setHours(23, 59, 59, 999);
+      groupFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
+    }
+
+    // 1. Order Summary (Revenue, Total, Completed, Pending, Cancelled)
+    const orders = await Order.find({
+      createdAt: { $gte: startDate, $lte: endDate }
+    });
+
+    let revenue = 0;
+    let completedOrders = 0;
+    let pendingOrders = 0;
+    let cancelledOrders = 0;
+    let totalOrders = orders.length;
+
+    orders.forEach(o => {
+      if (o.status !== 'cancelled') revenue += o.total;
+      if (o.status === 'completed') completedOrders++;
+      if (o.status === 'new' || o.status === 'preparing' || o.status === 'ready') pendingOrders++;
+      if (o.status === 'cancelled') cancelledOrders++;
+    });
+
+    // 2. Sales Graph
+    const salesGraph = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $ne: 'cancelled' } } },
+      { $group: { _id: groupFormat, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // 3. Peak Hour (from the current period)
+    const hourlyDistribution = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $ne: 'cancelled' } } },
+      { $group: { _id: { $hour: '$createdAt' }, count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 1 }
+    ]);
+    const peakHour = hourlyDistribution.length > 0 ? `${hourlyDistribution[0]._id}:00` : 'N/A';
+
+    // 4. Top Selling Items
+    const topItems = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $ne: 'cancelled' } } },
+      { $unwind: '$items' },
+      { $group: { _id: '$items.menuItem', name: { $first: '$items.name' }, totalQuantity: { $sum: '$items.quantity' }, totalRevenue: { $sum: '$items.subtotal' } } },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // 5. Category-wise Sales
+    const categories = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $ne: 'cancelled' } } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'menuitems', localField: 'items.menuItem', foreignField: '_id', as: 'menuItem' } },
+      { $unwind: '$menuItem' },
+      { $group: { _id: '$menuItem.category', totalQuantity: { $sum: '$items.quantity' }, totalRevenue: { $sum: '$items.subtotal' } } },
+      { $sort: { totalRevenue: -1 } }
+    ]);
+
+    // 6. Repeat Customers %
+    const customers = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $ne: 'cancelled' } } },
+      { $group: { _id: '$customer.phone', totalOrders: { $sum: 1 } } }
+    ]);
+    const totalCustomers = customers.length;
+    const repeatCustomers = customers.filter(c => c.totalOrders > 1).length;
+    const repeatPercentage = totalCustomers > 0 ? ((repeatCustomers / totalCustomers) * 100).toFixed(1) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        summary: { revenue, totalOrders, completedOrders, pendingOrders, cancelledOrders },
+        salesGraph,
+        peakHour,
+        topItems,
+        categories,
+        repeatPercentage
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

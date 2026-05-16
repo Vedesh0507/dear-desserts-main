@@ -114,11 +114,12 @@ function App() {
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="menu" element={<AdminMenu />} />
                 <Route path="customers" element={<AdminCustomers />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="history" element={<AdminHistory />} />
-                <Route path="offers" element={<AdminOffers />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="users" element={<AdminUsers />} />
+                {/* Admin-only routes — staff redirected to /admin */}
+                <Route path="analytics" element={<ProtectedRoute adminOnly><AdminAnalytics /></ProtectedRoute>} />
+                <Route path="history" element={<ProtectedRoute adminOnly><AdminHistory /></ProtectedRoute>} />
+                <Route path="offers" element={<ProtectedRoute adminOnly><AdminOffers /></ProtectedRoute>} />
+                <Route path="settings" element={<ProtectedRoute adminOnly><AdminSettings /></ProtectedRoute>} />
+                <Route path="users" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />
               </Route>
             </Routes>
           </CartProvider>
