@@ -1,6 +1,39 @@
 const { Settings } = require('../models');
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('../config/cloudinary');
+
+/**
+ * Upload a buffer to Cloudinary
+ */
+const uploadToCloudinary = (buffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: folder },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
+
+/**
+ * Extract public_id from a Cloudinary URL
+ */
+const extractPublicId = (url) => {
+  try {
+    const splits = url.split('/upload/');
+    if (splits.length > 1) {
+      const withoutVersion = splits[1].replace(/^v\d+\//, '');
+      return withoutVersion.split('.')[0];
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
 
 // @desc    Get settings
 // @route   GET /api/settings
@@ -33,14 +66,24 @@ exports.updateSettings = async (req, res) => {
 
     // Handle logo upload
     if (req.file) {
+      // Upload new logo to Cloudinary
+      const result = await uploadToCloudinary(req.file.buffer, 'dear_desserts/settings');
+      req.body.logo = result.secure_url;
+
       // Delete old logo if exists
       if (settings.logo && settings.logo !== 'logo.png') {
-        const oldLogoPath = path.join(__dirname, '../uploads', settings.logo);
-        if (fs.existsSync(oldLogoPath)) {
-          fs.unlinkSync(oldLogoPath);
+        if (settings.logo.startsWith('http') && settings.logo.includes('cloudinary')) {
+          const publicId = extractPublicId(settings.logo);
+          if (publicId) {
+            await cloudinary.uploader.destroy(publicId).catch(err => console.error('Cloudinary destroy error:', err));
+          }
+        } else if (!settings.logo.startsWith('http')) {
+          const oldLogoPath = path.join(__dirname, '../uploads', settings.logo);
+          if (fs.existsSync(oldLogoPath)) {
+            fs.unlinkSync(oldLogoPath);
+          }
         }
       }
-      req.body.logo = req.file.filename;
     }
 
     // Update fields

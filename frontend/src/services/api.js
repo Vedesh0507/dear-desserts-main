@@ -56,12 +56,8 @@ export const menuAPI = {
   getAll: (params) => api.get('/menu', { params }),
   getById: (id) => api.get(`/menu/${id}`),
   getByCategories: () => api.get('/menu/categories'),
-  create: (formData) => api.post('/menu', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  update: (id, formData) => api.put(`/menu/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  create: (formData) => api.post('/menu', formData),
+  update: (id, formData) => api.put(`/menu/${id}`, formData),
   delete: (id) => api.delete(`/menu/${id}`),
   toggleAvailability: (id) => api.patch(`/menu/${id}/availability`),
 };
@@ -105,9 +101,7 @@ export const offerAPI = {
 // Settings APIs
 export const settingsAPI = {
   get: () => api.get('/settings'),
-  update: (formData) => api.put('/settings', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  update: (formData) => api.put('/settings', formData),
 };
 
 // Notification APIs

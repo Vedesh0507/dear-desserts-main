@@ -1,6 +1,39 @@
 const { MenuItem } = require('../models');
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('../config/cloudinary');
+
+/**
+ * Upload a buffer to Cloudinary
+ */
+const uploadToCloudinary = (buffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: folder },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+};
+
+/**
+ * Extract public_id from a Cloudinary URL
+ */
+const extractPublicId = (url) => {
+  try {
+    const splits = url.split('/upload/');
+    if (splits.length > 1) {
+      const withoutVersion = splits[1].replace(/^v\d+\//, '');
+      return withoutVersion.split('.')[0];
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
 
 /**
  * Transform a menu item's `image` field into a full URL.
@@ -82,7 +115,8 @@ exports.createMenuItem = async (req, res) => {
     const itemData = { ...req.body };
     
     if (req.file) {
-      itemData.image = req.file.filename;
+      const result = await uploadToCloudinary(req.file.buffer, 'dear_desserts/menu');
+      itemData.image = result.secure_url;
     }
 
     const menuItem = await MenuItem.create(itemData);
@@ -122,14 +156,25 @@ exports.updateMenuItem = async (req, res) => {
 
     // Handle image upload
     if (req.file) {
+      // Upload new image to Cloudinary
+      const result = await uploadToCloudinary(req.file.buffer, 'dear_desserts/menu');
+      updateData.image = result.secure_url;
+
       // Delete old image if exists
       if (menuItem.image && menuItem.image !== 'default-food.jpg') {
-        const oldImagePath = path.join(__dirname, '../uploads', menuItem.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
+        if (menuItem.image.startsWith('http') && menuItem.image.includes('cloudinary')) {
+          const publicId = extractPublicId(menuItem.image);
+          if (publicId) {
+            await cloudinary.uploader.destroy(publicId).catch(err => console.error('Cloudinary destroy error:', err));
+          }
+        } else if (!menuItem.image.startsWith('http')) {
+          // Old local file
+          const oldImagePath = path.join(__dirname, '../uploads', menuItem.image);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
         }
       }
-      updateData.image = req.file.filename;
     }
 
     menuItem = await MenuItem.findByIdAndUpdate(
@@ -171,9 +216,16 @@ exports.deleteMenuItem = async (req, res) => {
 
     // Delete image if exists
     if (menuItem.image && menuItem.image !== 'default-food.jpg') {
-      const imagePath = path.join(__dirname, '../uploads', menuItem.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      if (menuItem.image.startsWith('http') && menuItem.image.includes('cloudinary')) {
+        const publicId = extractPublicId(menuItem.image);
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId).catch(err => console.error('Cloudinary destroy error:', err));
+        }
+      } else if (!menuItem.image.startsWith('http')) {
+        const imagePath = path.join(__dirname, '../uploads', menuItem.image);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
       }
     }
 
