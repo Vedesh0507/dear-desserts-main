@@ -112,14 +112,22 @@ exports.getMenuItem = async (req, res) => {
 // @access  Private/Admin
 exports.createMenuItem = async (req, res) => {
   try {
+    console.log("createMenuItem REQ.BODY:", req.body);
+    console.log("createMenuItem REQ.FILE:", req.file);
+
     const itemData = { ...req.body };
     
     if (req.file) {
+      console.log("Uploading file to Cloudinary...");
       const result = await uploadToCloudinary(req.file.buffer, 'dear_desserts/menu');
+      console.log("Cloudinary result:", result);
       itemData.image = result.secure_url;
+      console.log("itemData.image set to:", itemData.image);
     }
 
+    console.log("Creating MenuItem with itemData:", itemData);
     const menuItem = await MenuItem.create(itemData);
+    console.log("MenuItem created successfully:", menuItem._id);
 
     // Emit socket event for real-time update
     if (req.io) {
@@ -131,6 +139,7 @@ exports.createMenuItem = async (req, res) => {
       data: withFullImageUrl(menuItem, req)
     });
   } catch (error) {
+    console.error("createMenuItem ERROR:", error);
     res.status(500).json({
       success: false,
       message: error.message

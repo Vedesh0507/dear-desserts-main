@@ -1,41 +1,28 @@
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
+require('dotenv').config();
+const cloudinary = require('./config/cloudinary');
 
-async function test() {
+const test = async () => {
   try {
-    // We need to login first to get the token
-    const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
-      email: 'admin@deardesserts.com', // Let's check DB or auth script for credentials
-      password: 'admin123'
-    });
+    console.log("Cloudinary config:", cloudinary.config());
     
-    const token = loginRes.data.token;
-    console.log('Logged in, token:', token);
-
-    const form = new FormData();
-    form.append('name', 'Lasagna Veg');
-    form.append('description', 'Layers of rich cheesy goodness');
-    form.append('price', '140');
-    form.append('category', 'savories');
-    form.append('isAvailable', 'true');
-    form.append('isBestSeller', 'false');
-    form.append('isSpecial', 'false');
-    form.append('preparationTime', '15');
+    // Create a 1x1 transparent PNG buffer
+    const buffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
     
-    // We can skip image or add a dummy one
-    
-    const res = await axios.post('http://localhost:5000/api/menu', form, {
-      headers: {
-        ...form.getHeaders(),
-        Authorization: `Bearer ${token}`
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'dear_desserts/test' },
+      (error, result) => {
+        if (error) {
+          console.error("Upload error:", error);
+        } else {
+          console.log("Upload result:", result);
+          console.log("Secure URL:", result.secure_url);
+        }
       }
-    });
-    console.log('Success:', res.data);
+    );
+    stream.end(buffer);
   } catch (err) {
-    console.error('Error:', err.response ? err.response.data : err.message);
+    console.error(err);
   }
-}
+};
 
 test();
