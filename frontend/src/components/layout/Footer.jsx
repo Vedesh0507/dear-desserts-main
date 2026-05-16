@@ -116,6 +116,18 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Built by credit */}
+      <div className="border-t border-white/10 bg-chocolate-950">
+        <div className="container mx-auto px-4 py-3 text-center">
+          <p className="text-cream-400 text-[11px]">
+            Built by{' '}
+            <a href="https://uxitech.in" target="_blank" rel="noopener noreferrer" className="text-gold-400 hover:text-gold-300 transition-colors font-semibold underline underline-offset-2">
+              uxitech.in
+            </a>
+          </p>
+        </div>
+      </div>
     </footer>
   );
 };

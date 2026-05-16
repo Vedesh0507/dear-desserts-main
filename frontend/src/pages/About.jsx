@@ -32,7 +32,7 @@ const About = () => {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative">
               <div className="relative rounded-2xl overflow-hidden shadow-lg">
-                <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&q=80" alt="Desserts" className="w-full h-[300px] md:h-[380px] object-cover" />
+                <img src="/about.jpg" alt="Dear Desserts" className="w-full h-[300px] md:h-[380px] object-contain bg-chocolate-950" />
               </div>
               <div className="absolute -bottom-4 -right-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-cream-200">
                 <p className="font-display text-base font-bold text-chocolate-900">Premium</p>
@@ -40,11 +40,11 @@ const About = () => {
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="space-y-4">
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-chocolate-950">A Symphony of Flavors</h2>
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-chocolate-950">A Taste of Premium Dessert Excellence</h2>
               <div className="space-y-3 text-sm text-chocolate-600 leading-relaxed font-light">
-                <p><strong className="font-semibold text-chocolate-800">Dear Desserts</strong> is a premium dessert cafe serving delicious waffles, brownies, cheesecakes, croissants, and refreshing popsicles.</p>
-                <p>Crafted with high-quality ingredients and rich flavors, every item is made to deliver the perfect sweet experience.</p>
-                <p>Whether you're looking for a quick bite or a place to enjoy desserts with friends, Dear Desserts is your ultimate destination.</p>
+                <p><strong className="font-semibold text-chocolate-800">Dear Desserts</strong> is more than a dessert café — it is a place where premium flavors, quality ingredients, and unforgettable experiences come together. From rich brownies and loaded waffles to refreshing popsicles and savory bites, every item is crafted with care and perfection.</p>
+                <p>Located in Bhavanipuram, we focus on delivering not just food, but moments of happiness in every bite. Our goal is to create a warm and premium experience where every customer feels welcomed and every dessert feels special.</p>
+                <p>Whether it's a quick sweet craving, a family visit, or a late-night dessert stop, Dear Desserts is your perfect destination for taste, comfort, and love at first bite.</p>
               </div>
             </motion.div>
           </div>
