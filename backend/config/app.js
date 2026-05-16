@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
@@ -17,6 +19,32 @@ const notificationRoutes = require('../routes/notifications');
 const invoiceRoutes = require('../routes/invoice');
 
 const app = express();
+
+// ---------- Security Middleware ----------
+
+// HTTP security headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin image loading
+  contentSecurityPolicy: false, // Disable CSP for API server
+}));
+
+// Rate limiting — prevent brute force / DDoS
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // limit each IP to 200 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' },
+});
+app.use('/api/', apiLimiter);
+
+// Stricter rate limit on auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20, // 20 login attempts per 15 min
+  message: { success: false, message: 'Too many login attempts, please try again later.' },
+});
+app.use('/api/auth/login', authLimiter);
 
 // ---------- Core Middleware ----------
 

@@ -1,8 +1,11 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { onForegroundMessage } from './firebase';
 
 // Customer Pages
 import Home from './pages/Home';
@@ -31,6 +34,30 @@ import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
+  // Listen for foreground FCM push notifications
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage((payload) => {
+      const { title, body } = payload.notification || {};
+      if (title || body) {
+        toast(
+          (t) => (
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-gold-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-gold-500 text-xs font-bold">DD</span>
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-white">{title}</p>
+                <p className="text-xs text-cream-300 mt-0.5">{body}</p>
+              </div>
+            </div>
+          ),
+          { duration: 6000 }
+        );
+      }
+    });
+    return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
+  }, []);
+
   return (
     <Router>
       <AuthProvider>

@@ -1,12 +1,13 @@
 const { Order, MenuItem, Notification, Offer } = require('../models');
 const { generatePaymentQR } = require('../utils/upiQR');
+const { sendPushNotification } = require('../utils/firebaseAdmin');
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Public
 exports.createOrder = async (req, res) => {
   try {
-    const { customer, items, discountCode, paymentMethod, paymentStatus, notes } = req.body;
+    const { customer, items, discountCode, paymentMethod, paymentStatus, notes, fcmToken } = req.body;
 
     // Validate items and calculate totals
     let subtotal = 0;
@@ -64,6 +65,7 @@ exports.createOrder = async (req, res) => {
       // For UPI, always start as pending unless explicitly provided
       paymentStatus: paymentMethod === 'upi' ? 'pending' : (paymentStatus || 'pending'),
       notes,
+      fcmToken: fcmToken || null,
       statusHistory: [{ status: 'new', timestamp: new Date() }]
     });
 
@@ -298,6 +300,32 @@ exports.updateOrderStatus = async (req, res) => {
     });
 
     await order.save();
+
+    // Send push notification to customer on key status changes
+    if (order.fcmToken) {
+      if (status === 'completed') {
+        await sendPushNotification(
+          order.fcmToken,
+          'Order Completed',
+          `Your order #${order.tokenNumber} has been completed. Please collect it at the counter!`,
+          { orderNumber: order.orderNumber, tokenNumber: String(order.tokenNumber) }
+        );
+      } else if (status === 'ready') {
+        await sendPushNotification(
+          order.fcmToken,
+          'Order Ready',
+          `Your order #${order.tokenNumber} is ready! Please come to the counter.`,
+          { orderNumber: order.orderNumber, tokenNumber: String(order.tokenNumber) }
+        );
+      } else if (status === 'preparing') {
+        await sendPushNotification(
+          order.fcmToken,
+          'Order Being Prepared',
+          `Your order #${order.tokenNumber} is now being prepared.`,
+          { orderNumber: order.orderNumber, tokenNumber: String(order.tokenNumber) }
+        );
+      }
+    }
 
     // Emit socket event
     if (req.io) {

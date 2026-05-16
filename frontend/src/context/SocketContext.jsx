@@ -79,8 +79,8 @@ export const SocketProvider = ({ children }) => {
           <div className="flex-1 w-0 p-4">
             <div className="flex items-start">
               <div className="flex-shrink-0 pt-0.5">
-                <span className="h-10 w-10 rounded-full bg-chocolate-100 flex items-center justify-center text-chocolate-600">
-                  🔔
+                <span className="h-10 w-10 rounded-full bg-chocolate-100 flex items-center justify-center text-chocolate-600 text-sm font-bold">
+                  New
                 </span>
               </div>
               <div className="ml-3 flex-1">

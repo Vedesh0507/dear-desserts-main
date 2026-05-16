@@ -80,6 +80,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  fcmToken: {
+    type: String,
+    default: null
+  },
   statusHistory: [{
     status: String,
     timestamp: {
